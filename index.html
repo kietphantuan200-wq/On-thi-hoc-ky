@@ -3,334 +3,338 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kiệt Developer - AI Ultimate System</title>
+    <title>Kiệt Dev AI - v6 Ultimate System</title>
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root {
-            --bg: #000000;
-            --card: #121212;
-            --primary: #8b5cf6;
-            --secondary: #ec4899;
-            --accent: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --text: #ffffff;
+            --bg: #000000; --card: #121212; --primary: #8b5cf6; --secondary: #ec4899;
+            --accent: #10b981; --text: #ffffff; --border: #222;
+        }
+        /* Chế độ sáng (Light Mode) */
+        body.light-mode {
+            --bg: #f0f2f5; --card: #ffffff; --text: #1a1a1a; --border: #ddd;
         }
 
-        * { box-sizing: border-box; transition: 0.3s; }
+        * { box-sizing: border-box; transition: 0.3s ease; }
         body { font-family: 'Lexend', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 90px; overflow-x: hidden; }
 
-        /* Navbar Bottom */
-        .nav-bar { position: fixed; bottom: 0; width: 100%; background: rgba(15, 15, 15, 0.98); display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid #222; z-index: 1000; overflow-x: auto; }
-        .nav-item { color: #555; cursor: pointer; font-size: 1.1rem; min-width: 50px; text-align: center; }
-        .nav-item.active { color: var(--primary); transform: translateY(-3px); }
+        /* Popup Thông báo lỗi */
+        #error-alert { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 5000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .alert-box { background: var(--card); border: 2px solid var(--secondary); border-radius: 25px; padding: 30px; text-align: center; max-width: 450px; box-shadow: 0 0 50px rgba(236, 72, 153, 0.3); animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
         /* Pages */
-        .page { display: none; padding: 20px; animation: fadeIn 0.5s ease; }
+        .page { display: none; padding: 20px; animation: fadeIn 0.4s ease; }
         .page.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         /* UI Elements */
-        .glass-card { background: var(--card); border-radius: 20px; padding: 25px; border: 1px solid #222; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        input, textarea, select, button { width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px; border: 1px solid #333; background: #0a0a0a; color: white; outline: none; font-family: inherit; }
+        .glass-card { background: var(--card); border-radius: 20px; padding: 25px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        input, textarea, select, button { width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text); outline: none; font-family: inherit; }
         .btn-gradient { background: linear-gradient(90deg, var(--primary), var(--secondary)); border: none; font-weight: bold; cursor: pointer; color: white; }
-        ::placeholder { color: #555; font-style: italic; }
+        ::placeholder { color: #888; font-style: italic; }
 
-        /* Avatar */
-        .avatar-preview { width: 110px; height: 110px; border-radius: 50%; border: 3px solid var(--primary); margin: 0 auto 15px; display: block; object-fit: cover; background: #222; }
+        /* Navbar 8 mục */
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: var(--card); display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid var(--border); z-index: 1000; overflow-x: auto; }
+        .nav-item { color: #666; cursor: pointer; font-size: 1rem; min-width: 45px; text-align: center; }
+        .nav-item.active { color: var(--primary); transform: translateY(-5px); }
 
-        /* Subject Grid */
-        .grid-subjects { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .sub-card { background: #1a1a1a; padding: 25px 10px; border-radius: 15px; text-align: center; border: 1px solid #333; cursor: pointer; }
-        .sub-card:hover { border-color: var(--primary); background: #222; }
-
+        /* Profile & Stats */
+        .avatar-lg { width: 120px; height: 120px; border-radius: 50%; border: 4px solid var(--primary); margin: 0 auto 15px; display: block; object-fit: cover; background: #333; }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .stat-box { background: var(--bg); padding: 15px; border-radius: 15px; text-align: center; border: 1px solid var(--border); }
+        
         /* Quiz */
-        .quiz-opt { display: block; width: 100%; padding: 15px; background: #0f172a; border: 2px solid #1e293b; border-radius: 10px; margin: 10px 0; text-align: left; color: white; cursor: pointer; }
-        .quiz-opt.selected { border-color: var(--primary); background: #1e1b4b; }
-
-        /* Leaderboard */
-        .top-podium { display: flex; align-items: flex-end; justify-content: center; gap: 10px; margin-bottom: 30px; height: 130px; }
-        .podium-item { flex: 1; text-align: center; background: #111; border-radius: 10px 10px 0 0; position: relative; font-size: 0.8rem; padding: 5px; }
-        .p-1 { height: 100%; border-top: 4px solid gold; }
-        .p-2 { height: 80%; border-top: 4px solid silver; }
-        .p-3 { height: 65%; border-top: 4px solid #cd7f32; }
-
-        /* Admin & Feedback */
-        .fb-card { background: #1a1a1a; padding: 15px; border-radius: 12px; margin-bottom: 10px; border-left: 4px solid var(--secondary); }
-        .admin-stat { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #222; }
-
-        /* Animation Result */
-        .stat-circle { width: 140px; height: 140px; border-radius: 50%; border: 8px solid var(--primary); display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 20px auto; animation: pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        @keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
-
-        #loading-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .quiz-opt { display: block; width: 100%; padding: 15px; background: rgba(139, 92, 246, 0.1); border: 2px solid var(--border); border-radius: 10px; margin: 10px 0; text-align: left; color: var(--text); cursor: pointer; }
+        .quiz-opt.selected { border-color: var(--primary); background: rgba(139, 92, 246, 0.2); }
+        #loading { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 4000; flex-direction: column; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
 
-    <div id="loading-overlay">
-        <i class="fas fa-atom fa-spin fa-3x" style="color: var(--primary);"></i>
-        <h2 style="margin-top: 20px;">KIỆT DEV AI ĐANG XỬ LÝ...</h2>
+    <div id="error-alert">
+        <div class="alert-box">
+            <i class="fas fa-tools fa-3x" style="color: var(--secondary); margin-bottom: 20px;"></i>
+            <h3>THÔNG BÁO TỪ KIỆT DEV</h3>
+            <p style="line-height: 1.6; font-size: 0.95rem;">Nếu có bất cứ lỗi gì thì bạn hãy chụp màn hình lại sau đó tiến qua mục thứ 7 gửi ảnh kèm diễn tả lúc đấy như thế nào.</p>
+            <button class="btn-gradient" onclick="closeAlert()" style="margin-top: 15px;">TÔI ĐÃ HIỂU</button>
+        </div>
     </div>
 
-    <div id="page-intro" class="page active">
+    <div id="loading">
+        <i class="fas fa-atom fa-spin fa-4x" style="color: var(--primary);"></i>
+        <h2 style="margin-top: 20px;">KIỆT DEV AI ĐANG QUÉT ĐỀ...</h2>
+    </div>
+
+    <div id="page-1" class="page active">
         <div class="glass-card" style="text-align: center; margin-top: 40px;">
             <i class="fas fa-brain fa-4x" style="color: var(--primary);"></i>
-            <h1 style="margin-top: 15px;">KIỆT DEV HUB</h1>
-            <p>Dự án web học tập thông minh lớp 7. Tự động giải đề, quét kiến thức và phát hiện lỗi sai bằng AI.</p>
-            <div style="background: #111; padding: 15px; border-radius: 15px; font-size: 0.85rem; margin: 20px 0; border: 1px solid #222;">
-                <p><b>Tác giả:</b> Kiệt (Solo Developer)</p>
-                <p><b>Công nghệ:</b> Google Gemini 1.5 Flash</p>
-            </div>
-            <button class="btn-gradient" onclick="nav('profile')">VÀO HỆ THỐNG</button>
+            <h1>KIỆT AI HUB v6</h1>
+            <p>Nền tảng hỗ trợ học tập lớp 7 tích hợp AI Gemini 1.5 Flash.</p>
+            <button class="btn-gradient" onclick="nav(2)">VÀO HỆ THỐNG</button>
         </div>
     </div>
 
-    <div id="page-profile" class="page">
-        <div class="glass-card">
-            <h2>Tạo Tài Khoản</h2>
-            <img src="" id="avt-view" class="avatar-preview" style="display:none">
-            <div id="avt-placeholder" class="avatar-preview" style="display:flex; align-items:center; justify-content:center"><i class="fas fa-user-plus fa-2x"></i></div>
-            
-            <div style="display:flex; gap:10px">
-                <button onclick="document.getElementById('cap').click()"><i class="fas fa-camera"></i> Chụp</button>
-                <button onclick="document.getElementById('up').click()"><i class="fas fa-image"></i> Chọn ảnh</button>
-            </div>
-            <input type="file" id="cap" accept="image/*" capture="user" hidden onchange="showAvt(this)">
-            <input type="file" id="up" accept="image/*" hidden onchange="showAvt(this)">
+    <div id="page-2" class="page">
+        <div id="auth-choice" class="glass-card" style="text-align: center;">
+            <h2>Bảo Mật 2 Lớp</h2>
+            <button class="btn-gradient" onclick="showAuth('reg')">TẠO TÀI KHOẢN</button>
+            <button style="background:var(--border)" onclick="showAuth('login')">ĐĂNG NHẬP</button>
+        </div>
 
-            <input type="text" id="reg-name" placeholder="Nhập bạn muốn viết vào đây... (Họ tên)">
-            <input type="text" id="reg-nick" placeholder="Nhập bạn muốn viết vào đây... (Biệt danh)">
-            <input type="password" id="reg-pass" placeholder="Nhập bạn muốn viết vào đây... (Mật khẩu)">
-            
-            <button class="btn-gradient" onclick="saveUser()">HOÀN TẤT ĐĂNG KÝ</button>
+        <div id="form-reg" class="glass-card" style="display:none">
+            <h3>Đăng Ký Thành Viên</h3>
+            <input type="text" id="r-name" placeholder="Nhập bạn muốn viết vào đây... (Tên đăng nhập)">
+            <input type="password" id="r-p1" placeholder="Nhập bạn muốn viết vào đây... (Mật khẩu lớp 1)">
+            <input type="password" id="r-p2" placeholder="Nhập bạn muốn viết vào đây... (Mật khẩu xác thực - Phải khác)">
+            <button class="btn-gradient" onclick="handleRegister()">XÁC NHẬN ĐĂNG KÝ</button>
+            <button onclick="showAuth('choice')" style="background:none; border:none">← Quay lại</button>
+        </div>
+
+        <div id="form-login" class="glass-card" style="display:none">
+            <h3>Đăng Nhập Đối Chiếu</h3>
+            <input type="text" id="l-name" placeholder="Nhập bạn muốn viết vào đây... (Tên)">
+            <input type="password" id="l-p1" placeholder="Mật khẩu lớp 1...">
+            <input type="password" id="l-p2" placeholder="Mật khẩu xác thực...">
+            <button class="btn-gradient" onclick="handleLogin()">VÀO TÀI KHOẢN</button>
+            <button onclick="showAuth('choice')" style="background:none; border:none">← Quay lại</button>
+        </div>
+
+        <div id="user-info-card" class="glass-card" style="display:none; text-align: center;">
+            <i class="fas fa-check-circle fa-3x" style="color: var(--accent);"></i>
+            <h2 id="welcome-name"></h2>
+            <button class="btn-gradient" onclick="nav(3)">ĐI ĐẾN BÀI TEST AI</button>
         </div>
     </div>
 
-    <div id="page-test" class="page">
-        <div id="sub-zone">
+    <div id="page-3" class="page">
+        <div id="sub-list">
             <h2>Chọn Môn Ôn Tập</h2>
-            <div class="grid-subjects">
-                <div class="sub-card" onclick="openTest('Toán Học')"><i class="fas fa-subscript fa-2x"></i><br>TOÁN</div>
-                <div class="sub-card" onclick="openTest('Tiếng Anh')"><i class="fas fa-language fa-2x"></i><br>ANH VĂN</div>
-                <div class="sub-card" onclick="openTest('Ngữ Văn')"><i class="fas fa-feather fa-2x"></i><br>VĂN</div>
-                <div class="sub-card" onclick="openTest('KHTN')"><i class="fas fa-atom fa-2x"></i><br>KHTN</div>
-                <div class="sub-card" onclick="openTest('Sử - Địa')"><i class="fas fa-map-marked-alt fa-2x"></i><br>SỬ-ĐỊA</div>
-                <div class="sub-card" onclick="openTest('GDCD')"><i class="fas fa-gavel fa-2x"></i><br>GDCD</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
+                <button onclick="prepTest('Toán')">TOÁN</button>
+                <button onclick="prepTest('Anh')">ANH VĂN</button>
+                <button onclick="prepTest('KHTN')">KHTN</button>
+                <button onclick="prepTest('Văn')">NGỮ VĂN</button>
             </div>
         </div>
-
         <div id="test-prep" style="display:none">
-            <h2 id="cur-sub"></h2>
+            <h3 id="active-sub"></h3>
             <div class="glass-card">
-                <select id="mode-sel">
-                    <option value="survey">Khảo sát (Có gợi ý)</option>
-                    <option value="exam">Kiểm tra (Chấm điểm)</option>
-                </select>
-                <p>Tải ảnh đề cương / kiến thức:</p>
+                <p>Chụp ảnh đề cương của bạn:</p>
                 <input type="file" id="exam-imgs" multiple accept="image/*">
-                <button class="btn-gradient" onclick="callAI()">PHÂN TÍCH VỚI AI</button>
-                <button style="background:none; border:none; color:gray" onclick="cancelT()">Quay lại</button>
+                <button class="btn-gradient" onclick="runAI()">BẮT ĐẦU PHÂN TÍCH</button>
+                <button onclick="location.reload()" style="background:none">Hủy</button>
             </div>
         </div>
-
         <div id="quiz-zone" style="display:none">
-            <div id="ai-err-box" class="glass-card" style="display:none; border-color: var(--warning); color: var(--warning);"></div>
-            <div id="quiz-list"></div>
-            <button class="btn-gradient" onclick="finishT()">NỘP BÀI</button>
-        </div>
-
-        <div id="quiz-res" style="display:none">
-            <div class="glass-card" style="text-align: center;">
-                <h2>KẾT QUẢ PHÂN TÍCH</h2>
-                <div class="stat-circle">
-                    <span id="res-pc" style="font-size: 1.8rem; font-weight: bold;">0%</span>
-                    <small id="res-num">0/0</small>
-                </div>
-                <div id="res-detail" style="text-align: left; font-size: 0.9rem;"></div>
-                <button class="btn-gradient" onclick="location.reload()">LÀM BÀI KHÁC</button>
-            </div>
+            <div id="ai-err" class="glass-card" style="display:none; color:var(--secondary); border-color:var(--secondary)"></div>
+            <div id="question-list"></div>
+            <button class="btn-gradient" onclick="submitTest()">NỘP BÀI</button>
         </div>
     </div>
 
-    <div id="page-rank" class="page">
+    <div id="page-4" class="page">
         <h2>Bảng Vàng Danh Dự</h2>
-        <div class="top-podium" id="podium"></div>
-        <div class="glass-card">
-            <div id="rank-rows"></div>
-            <hr style="border: 0.5px solid #222; margin: 15px 0;">
-            <div style="display:flex; gap:10px">
-                <input type="text" id="sr-name" placeholder="Nhập bạn muốn viết vào đây... (Tên cần tìm)">
-                <button onclick="searchR()" style="width:80px">Tìm</button>
-            </div>
-            <p id="sr-out" style="text-align:center; color:var(--primary); font-weight:bold"></p>
-        </div>
+        <div class="glass-card" id="rank-content"></div>
     </div>
 
-    <div id="page-settings" class="page">
+    <div id="page-5" class="page">
         <div class="glass-card" style="text-align: center;">
-            <h2>Tài Khoản Của Tôi</h2>
-            <div id="my-profile-info"></div>
-            <button onclick="location.reload()" style="background: var(--danger)">ĐĂNG XUẤT</button>
-        </div>
-    </div>
-
-    <div id="page-feedback" class="page">
-        <div class="glass-card">
-            <h2>Góp Ý Phát Triển</h2>
-            <p>Mọi ý kiến của bạn đều giúp Kiệt nâng cấp web tốt hơn!</p>
-            <textarea id="fb-txt" rows="6" placeholder="Nhập bạn muốn viết vào đây... (Lời góp ý)"></textarea>
-            <button class="btn-gradient" onclick="sendFB()">GỬI LỜI NHẮN</button>
-        </div>
-    </div>
-
-    <div id="page-admin" class="page">
-        <div id="adm-lock" class="glass-card">
-            <h2 style="color:var(--secondary)">Dành riêng cho Kiệt</h2>
-            <input type="password" id="adm-pass" placeholder="Nhập bạn muốn viết vào đây... (Mật khẩu Admin)">
-            <button class="btn-gradient" onclick="authAdm()">XÁC NHẬN CHỦ WEB</button>
-        </div>
-
-        <div id="adm-panel" style="display:none">
-            <h2>Hệ Thống Quản Trị</h2>
-            <div class="glass-card" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px">
-                <div class="sub-card">User: <b id="a-u">0</b></div>
-                <div class="sub-card">Test: <b id="a-t">0</b></div>
+            <h2>Quản Lý Tài Khoản</h2>
+            <img src="" id="prof-avt" class="avatar-lg">
+            <h3 id="prof-nick">Người dùng mới</h3>
+            
+            <div style="display:flex; gap:10px; margin-bottom: 20px;">
+                <button onclick="document.getElementById('avt-up').click()" style="font-size: 0.8rem;"><i class="fas fa-camera"></i> Đổi ảnh</button>
+                <input type="file" id="avt-up" hidden accept="image/*" onchange="changeAvt(this)">
+                <button onclick="changeNick()" style="font-size: 0.8rem;"><i class="fas fa-edit"></i> Đổi tên</button>
             </div>
-            <h3>Danh sách góp ý:</h3>
-            <div id="a-fb-list"></div>
-            <hr>
-            <div style="display:flex; gap:10px">
-                <a href="https://aistudio.google.com/" target="_blank" class="sub-card" style="flex:1; text-decoration:none">Gemini</a>
-                <a href="https://github.com/" target="_blank" class="sub-card" style="flex:1; text-decoration:none">GitHub</a>
+
+            <div class="stat-grid">
+                <div class="stat-box"><small>Điểm cao nhất</small><br><b id="st-score">0</b></div>
+                <div class="stat-box"><small>Bài đã làm</small><br><b id="st-count">0</b></div>
+            </div>
+
+            <hr style="border: 0.5px solid var(--border); margin: 20px 0;">
+
+            <button onclick="toggleTheme()" id="theme-btn"><i class="fas fa-moon"></i> Chế độ Tối/Sáng</button>
+            <button onclick="location.reload()" style="background: var(--secondary)"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
+        </div>
+    </div>
+
+    <div id="page-6" class="page">
+        <h2>Tiện Ích Học Tập</h2>
+        <div class="glass-card">Tính năng Sổ tay ghi chú đang được Kiệt phát triển...</div>
+    </div>
+
+    <div id="page-7" class="page">
+        <div class="glass-card">
+            <h2 style="color:var(--secondary)">Báo Lỗi Hệ Thống</h2>
+            <p>Vui lòng chụp màn hình nếu gặp lỗi Kiệt nhé!</p>
+            <input type="file" id="err-file" accept="image/*">
+            <textarea id="err-text" rows="5" placeholder="Nhập bạn muốn viết vào đây... (Diễn tả lúc gặp lỗi)"></textarea>
+            <button class="btn-gradient" onclick="sendBug()">GỬI BÁO CÁO</button>
+        </div>
+    </div>
+
+    <div id="page-8" class="page">
+        <div class="glass-card">
+            <h2>Hệ Thống Quản Trị</h2>
+            <input type="password" id="adm-pass" placeholder="Mật khẩu Admin Kiệt (200113)...">
+            <button class="btn-gradient" onclick="authAdmin()">TRUY CẬP</button>
+            <div id="adm-panel" style="display:none; margin-top: 20px;">
+                <h3>Lịch sử Báo lỗi/Góp ý:</h3>
+                <div id="bug-list"></div>
             </div>
         </div>
     </div>
 
     <div class="nav-bar">
-        <div class="nav-item active" onclick="nav('intro')"><i class="fas fa-home"></i></div>
-        <div class="nav-item" onclick="nav('profile')"><i class="fas fa-user-circle"></i></div>
-        <div class="nav-item" onclick="nav('test')"><i class="fas fa-book-open"></i></div>
-        <div class="nav-item" onclick="nav('rank')"><i class="fas fa-medal"></i></div>
-        <div class="nav-item" onclick="nav('settings')"><i class="fas fa-user-cog"></i></div>
-        <div class="nav-item" onclick="nav('feedback')"><i class="fas fa-comment-alt"></i></div>
-        <div class="nav-item" onclick="nav('admin')"><i class="fas fa-shield-alt"></i></div>
+        <div class="nav-item active" onclick="nav(1)"><i class="fas fa-home"></i></div>
+        <div class="nav-item" onclick="nav(2)"><i class="fas fa-user-lock"></i></div>
+        <div class="nav-item" onclick="nav(3)"><i class="fas fa-brain"></i></div>
+        <div class="nav-item" onclick="nav(4)"><i class="fas fa-medal"></i></div>
+        <div class="nav-item" onclick="nav(5)"><i class="fas fa-user-cog"></i></div>
+        <div class="nav-item" onclick="nav(6)"><i class="fas fa-book"></i></div>
+        <div class="nav-item" onclick="nav(7)"><i class="fas fa-bug"></i></div>
+        <div class="nav-item" onclick="nav(8)"><i class="fas fa-user-shield"></i></div>
     </div>
 
     <script type="module">
         import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
 
-        // --- CẤU HÌNH KIỆT DEV ---
-        const PART_1 = 'AIzaSyABbY'; // Dán phần đầu Key vào đây
-        const PART_2 = '28LB-C1vTeHkERmJPftCcGB3My8'; // Dán phần cuối Key vào đây
+        // --- CẤU HÌNH API KEY KIỆT DEV ---
+                const PART_1 = 'AIzaSyDSbSiEoTzz';
+        const PART_2 = '-njXisLAgQemEviSfq7TVLg';
         const API_KEY = PART_1 + PART_2;
 
-        let db = JSON.parse(localStorage.getItem('kiet_ultra_db')) || { users: [], feedbacks: [], testCount: 0 };
+
+        let db = JSON.parse(localStorage.getItem('kiet_v6_db')) || { users: [], bugs: [], settings: { theme: 'dark' } };
         let curU = null;
-        let admFails = 0;
         let activeSub = '';
-        let aiData = null;
+        let aiResult = null;
         let userAns = {};
 
-        // Nav
-        window.nav = (id) => {
+        // Khởi tạo theme
+        if(db.settings.theme === 'light') document.body.classList.add('light-mode');
+
+        // Nav & Popup
+        window.closeAlert = () => document.getElementById('error-alert').style.display = 'none';
+        window.nav = (num) => {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById('page-' + id).classList.add('active');
-            document.querySelectorAll('.nav-item').forEach((item, idx) => {
-                item.classList.remove('active');
-                if(['intro','profile','test','rank','settings','feedback','admin'][idx] === id) item.classList.add('active');
+            document.getElementById('page-' + num).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach((it, i) => {
+                it.classList.remove('active'); if(i === num-1) it.classList.add('active');
             });
-            if(id === 'rank') drawRank();
+            if(num === 5) renderProfile();
         };
 
-        // User
-        window.showAvt = (input) => {
+        // Auth 2 Lớp
+        window.showAuth = (type) => {
+            document.getElementById('auth-choice').style.display = type === 'choice' ? 'block' : 'none';
+            document.getElementById('form-reg').style.display = type === 'reg' ? 'block' : 'none';
+            document.getElementById('form-login').style.display = type === 'login' ? 'block' : 'none';
+        };
+
+        window.handleRegister = () => {
+            const n = document.getElementById('r-name').value;
+            const p1 = document.getElementById('r-p1').value;
+            const p2 = document.getElementById('r-p2').value;
+            if(!n || !p1 || !p2) return alert("Điền đủ thông tin Kiệt ơi!");
+            if(p1 === p2) return alert("2 mật khẩu phải khác nhau để bảo mật!");
+            db.users.push({ name: n, p1, p2, score: 0, count: 0, nick: n, avt: '' });
+            save(); alert("Đăng ký xong! Hãy đăng nhập."); showAuth('login');
+        };
+
+        window.handleLogin = () => {
+            const n = document.getElementById('l-name').value;
+            const p1 = document.getElementById('l-p1').value;
+            const p2 = document.getElementById('l-p2').value;
+            const u = db.users.find(x => x.name === n && x.p1 === p1 && x.p2 === p2);
+            if(u) {
+                curU = u;
+                document.getElementById('form-login').style.display = 'none';
+                document.getElementById('user-info-card').style.display = 'block';
+                document.getElementById('welcome-name').innerText = "Chào Kiệt: " + n;
+            } else alert("Sai thông tin đăng nhập!");
+        };
+
+        // Quản lý tài khoản (Section 5)
+        window.renderProfile = () => {
+            if(!curU) return alert("Vui lòng đăng nhập trước!");
+            document.getElementById('prof-avt').src = curU.avt || 'https://www.w3schools.com/howto/img_avatar.png';
+            document.getElementById('prof-nick').innerText = curU.nick;
+            document.getElementById('st-score').innerText = curU.score + "%";
+            document.getElementById('st-count').innerText = curU.count;
+        };
+
+        window.changeAvt = (input) => {
             const reader = new FileReader();
             reader.onload = (e) => {
-                document.getElementById('avt-view').src = e.target.result;
-                document.getElementById('avt-view').style.display = 'block';
-                document.getElementById('avt-placeholder').style.display = 'none';
+                curU.avt = e.target.result;
+                document.getElementById('prof-avt').src = e.target.result;
+                save();
             };
             reader.readAsDataURL(input.files[0]);
         };
 
-        window.saveUser = () => {
-            const name = document.getElementById('reg-name').value;
-            const pass = document.getElementById('reg-pass').value;
-            if(!name || !pass) return alert("Vui lòng điền đủ thông tin!");
-            
-            const u = {
-                id: Date.now(),
-                name, nick: document.getElementById('reg-nick').value || 'Học viên',
-                pass, avt: document.getElementById('avt-view').src,
-                score: 0, testCount: 0
-            };
-            db.users.push(u); save(); curU = u;
-            alert("Chào mừng " + name + " đã gia nhập!"); nav('test');
+        window.changeNick = () => {
+            const n = prompt("Nhập biệt danh bạn muốn viết vào đây...", curU.nick);
+            if(n) { curU.nick = n; document.getElementById('prof-nick').innerText = n; save(); }
         };
 
-        // Test
-        window.openTest = (s) => { 
-            if(!curU) return alert("Kiệt ơi, đăng ký tài khoản trước nhé!");
-            activeSub = s; 
-            document.getElementById('cur-sub').innerText = "Môn: " + s;
-            document.getElementById('sub-zone').style.display = 'none';
+        window.toggleTheme = () => {
+            const isLight = document.body.classList.toggle('light-mode');
+            db.settings.theme = isLight ? 'light' : 'dark';
+            save();
+        };
+
+        // AI Logic
+        window.prepTest = (s) => {
+            if(!curU) return alert("Đăng nhập đã Kiệt ơi!");
+            activeSub = s;
+            document.getElementById('active-sub').innerText = "Môn: " + s;
+            document.getElementById('sub-list').style.display = 'none';
             document.getElementById('test-prep').style.display = 'block';
         };
 
-        window.cancelT = () => {
-            document.getElementById('sub-zone').style.display = 'block';
-            document.getElementById('test-prep').style.display = 'none';
-        };
-
-        window.callAI = async () => {
+        window.runAI = async () => {
             const files = document.getElementById('exam-imgs').files;
-            if(files.length === 0) return alert("Hãy chụp ảnh đề cương!");
+            if(!files.length) return alert("Chưa có ảnh đề cương!");
+            document.getElementById('loading').style.display = 'flex';
             
-            document.getElementById('loading-overlay').style.display = 'flex';
-            const genAI = new GoogleGenerativeAI(API_KEY);
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
             try {
+                const genAI = new GoogleGenerativeAI(API_KEY);
+                const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
                 const imgs = await Promise.all([...files].map(f => new Promise(res => {
                     const r = new FileReader();
                     r.onloadend = () => res({ inlineData: { data: r.result.split(',')[1], mimeType: f.type }});
                     r.readAsDataURL(f);
                 })));
 
-                const prompt = `Bạn là trợ lý AI lớp 7 của Kiệt. 
-                1. Đọc đề cương môn ${activeSub}. 
-                2. Nếu đề cương có đáp án khoanh sẵn nhưng SAI, hãy liệt kê lỗi vào mảng 'errors'.
-                3. Tạo vô hạn câu hỏi trắc nghiệm (JSON) và 4 câu tự luận/viết. 
-                Trả về JSON: {"errors":[], "questions":[{"q":"","a":[],"c":0}], "essays":[]}`;
+                const prompt = `Bạn là AI hỗ trợ Kiệt. Đọc đề cương môn ${activeSub} lớp 7. 1. Liệt kê lỗi sai nếu có. 2. Tạo JSON: {"errors":[], "questions":[{"q":"","a":[],"c":0}]}`;
+                const res = await model.generateContent([prompt, ...imgs]);
+                aiResult = JSON.parse(res.response.text().match(/\{.*\}/s)[0]);
 
-                const result = await model.generateContent([prompt, ...imgs]);
-                aiData = JSON.parse(result.response.text().match(/\{.*\}/s)[0]);
-                startQ();
-            } catch (e) { alert("Lỗi kết nối AI!"); }
-            finally { document.getElementById('loading-overlay').style.display = 'none'; }
+                document.getElementById('test-prep').style.display = 'none';
+                document.getElementById('quiz-zone').style.display = 'block';
+                
+                if(aiResult.errors.length) {
+                    const errB = document.getElementById('ai-err');
+                    errB.style.display = 'block';
+                    errB.innerHTML = "⚠️ Lỗi đề cương: " + aiResult.errors.join(", ");
+                }
+
+                document.getElementById('question-list').innerHTML = aiResult.questions.map((q, i) => `
+                    <div class="glass-card">
+                        <p><b>Câu ${i+1}:</b> ${q.q}</p>
+                        ${q.a.map((o, j) => `<button class="quiz-opt" id="q${i}o${j}" onclick="sel(${i},${j})">${o}</button>`).join('')}
+                    </div>
+                `).join('');
+            } catch (e) { alert("Lỗi kết nối AI Gemini!"); }
+            finally { document.getElementById('loading').style.display = 'none'; }
         };
-
-        function startQ() {
-            document.getElementById('test-prep').style.display = 'none';
-            document.getElementById('quiz-zone').style.display = 'block';
-            
-            const errBox = document.getElementById('ai-err-box');
-            if(aiData.errors?.length > 0) {
-                errBox.style.display = 'block';
-                errBox.innerHTML = `<b>⚠️ AI phát hiện lỗi trong đề cương:</b><br>` + aiData.errors.join('<br>');
-            }
-
-            document.getElementById('quiz-list').innerHTML = aiData.questions.map((q, i) => `
-                <div class="glass-card">
-                    <p><b>Câu ${i+1}:</b> ${q.q}</p>
-                    ${q.a.map((opt, j) => `<button class="quiz-opt" id="q${i}o${j}" onclick="sel(${i},${j})">${opt}</button>`).join('')}
-                </div>
-            `).join('') + `<h3>Tự luận / Writing</h3>` + aiData.essays.map(e => `
-                <div class="glass-card"><p>${e}</p><textarea placeholder="Nhập bạn muốn viết vào đây..."></textarea></div>
-            `).join('');
-        }
 
         window.sel = (q, o) => {
             userAns[q] = o;
@@ -338,75 +342,32 @@
             document.getElementById(`q${q}o${o}`).classList.add('selected');
         };
 
-        window.finishT = () => {
+        window.submitTest = () => {
             let ok = 0;
-            aiData.questions.forEach((q, i) => { if(userAns[i] === q.c) ok++; });
-            const pc = Math.round((ok / aiData.questions.length) * 100);
-            
-            curU.score = Math.max(curU.score, pc);
-            curU.testCount++; db.testCount++; save();
-
-            document.getElementById('quiz-zone').style.display = 'none';
-            document.getElementById('quiz-res').style.display = 'block';
-            document.getElementById('res-pc').innerText = pc + "%";
-            document.getElementById('res-num').innerText = `${ok}/${aiData.questions.length}`;
-            document.getElementById('res-detail').innerHTML = `
-                <p><b>Xếp hạng:</b> ${pc >= 80 ? 'Siêu Cấp 👑' : pc >= 50 ? 'Chiến Binh 🛡️' : 'Cần Cố Gắng'}</p>
-                <p><b>Ghi chú:</b> AI đánh giá bạn mạnh về ${activeSub} nhưng cần xem lại ${aiData.questions.length - ok} câu sai.</p>
-            `;
+            aiResult.questions.forEach((q, i) => { if(userAns[i] === q.c) ok++; });
+            const s = Math.round((ok/aiResult.questions.length)*100);
+            curU.score = Math.max(curU.score, s);
+            curU.count++; save();
+            alert("Bạn đạt " + s + " điểm!"); location.reload();
         };
 
-        // Rank
-        function drawRank() {
-            const sorted = [...db.users].sort((a,b) => b.score - a.score);
-            document.getElementById('podium').innerHTML = `
-                <div class="podium-item p-2">🥈<br>${sorted[1]?.nick || '-'}</div>
-                <div class="podium-item p-1">🥇<br>${sorted[0]?.nick || '-'}</div>
-                <div class="podium-item p-3">🥉<br>${sorted[2]?.nick || '-'}</div>
-            `;
-            document.getElementById('rank-rows').innerHTML = sorted.slice(3, 20).map((u, i) => `
-                <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #222">
-                    <span>${i+4}. ${u.nick}</span><b>${u.score}%</b>
-                </div>
-            `).join('');
-        }
-
-        window.searchR = () => {
-            const n = document.getElementById('sr-name').value.toLowerCase();
-            const sorted = [...db.users].sort((a,b) => b.score - a.score);
-            const i = sorted.findIndex(u => u.name.toLowerCase().includes(n) || u.nick.toLowerCase().includes(n));
-            document.getElementById('sr-out').innerText = i !== -1 ? `Thứ hạng của bạn: ${i+1}` : "Không tìm thấy!";
+        // Bug & Admin
+        window.sendBug = () => {
+            const t = document.getElementById('err-text').value;
+            if(!t) return alert("Mô tả lỗi đã Kiệt ơi!");
+            db.bugs.push({ user: curU?.nick || 'Ẩn danh', text: t, date: new Date().toLocaleString() });
+            save(); alert("Đã gửi! Admin Kiệt sẽ xử lý.");
+            document.getElementById('err-text').value = "";
         };
 
-        // Feedback
-        window.sendFB = () => {
-            const t = document.getElementById('fb-txt').value;
-            if(!t) return alert("Vui lòng nhập nội dung!");
-            db.feedbacks.push({ user: curU?.name || 'Ẩn danh', text: t, time: new Date().toLocaleString() });
-            save(); alert("Đã gửi góp ý thành công!"); document.getElementById('fb-txt').value = "";
-        };
-
-        // Admin
-        window.authAdm = () => {
+        window.authAdmin = () => {
             if(document.getElementById('adm-pass').value === "200113") {
-                document.getElementById('adm-lock').style.display = 'none';
                 document.getElementById('adm-panel').style.display = 'block';
-                loadAdm();
-            } else {
-                admFails++; if(admFails >= 10) { document.body.innerHTML = "TRUY CẬP BỊ CẤM VĨNH VIỄN!"; }
-                alert("Sai mật khẩu!");
-            }
+                document.getElementById('bug-list').innerHTML = db.bugs.map(b => `<div class="glass-card"><small>${b.date} - ${b.user}</small><br>${b.text}</div>`).reverse().join('');
+            } else alert("Sai pass Admin!");
         };
 
-        function loadAdm() {
-            document.getElementById('a-u').innerText = db.users.length;
-            document.getElementById('a-t').innerText = db.testCount;
-            document.getElementById('a-fb-list').innerHTML = db.feedbacks.map(f => `
-                <div class="fb-card"><small>${f.time} - <b>${f.user}</b></small><br>${f.text}</div>
-            `).reverse().join('');
-        }
-
-        function save() { localStorage.setItem('kiet_ultra_db', JSON.stringify(db)); }
+        function save() { localStorage.setItem('kiet_v6_db', JSON.stringify(db)); }
     </script>
 </body>
 </html>
