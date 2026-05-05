@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Học Tập Lớp 7 - Dark Mode</title>
+    <style>
+        :root { --primary: #3b82f6; --gold: #fbbf24; --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; }
+        
+        /* Menu chính */
+        .sidebar { position: fixed; bottom: 0; width: 100%; background: #1e293b; display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid #334155; z-index: 1000; }
+        .nav-item { cursor: pointer; font-weight: bold; color: #94a3b8; }
+        .nav-item.active { color: var(--primary); }
+
+        .page { display: none; padding: 20px; padding-bottom: 100px; }
+        .page.active { display: block; }
+
+        /* Giao diện Test */
+        .header-test { background: var(--primary); color: white; padding: 20px; border-radius: 0 0 20px 20px; text-align: center; margin: -20px -20px 20px -20px; }
+        .timer-display { font-size: 2rem; font-weight: 800; color: var(--gold); }
+        .q-card { background: var(--card); padding: 20px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #334155; }
+        .option { display: block; width: 100%; padding: 12px; margin: 8px 0; border: 2px solid #334155; border-radius: 10px; background: #0f172a; color: white; text-align: left; cursor: pointer; }
+        .option.selected { border-color: var(--primary); background: #1e3a8a; }
+        .option.correct { background: #065f46; border-color: #10b981; }
+        .option.wrong { background: #7f1d1d; border-color: #ef4444; }
+        
+        .hint-box { background: #422006; color: #fef08a; padding: 10px; border-radius: 8px; margin: 10px 0; display: none; font-size: 0.9rem; border-left: 4px solid var(--gold); }
+        .explain-box { background: #064e3b; padding: 10px; border-radius: 8px; margin-top: 10px; display: none; font-size: 0.9rem; }
+
+        /* Bảng xếp hạng */
+        .rank-card { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 8px solid var(--primary); }
+
+        .btn { padding: 12px 25px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; margin: 5px; }
+        .btn-main { background: var(--primary); color: white; width: 100%; }
+        
+        input[type="text"] { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #334155; background: #1e293b; color: white; margin-bottom: 15px; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+
+<div id="page-intro" class="page active">
+    <h1>👋 Web Học Tập Lớp 7</h1>
+    <input type="text" id="userName" placeholder="Nhập tên của bạn để lưu Rank...">
+    <p>Dự án của <b>Kiệt & Team</b>. Hãy chọn tên và bắt đầu bài test bên dưới.</p>
+    <div style="background: var(--card); padding: 15px; border-radius: 15px;">
+        <h3>Sẵn sàng chưa?</h3>
+        <li>Chọn môn học ở mục Bài Test</li>
+        <li>Quét nhiều ảnh đề cương cùng lúc</li>
+        <li>Leo hạng lên rank Thánh Tri Thức</li>
+    </div>
+</div>
+
+<div id="page-test" class="page">
+    <div id="subject-menu">
+        <h2>Chọn môn học</h2>
+        <button class="btn btn-main" onclick="showTestOptions('Tiếng Anh')">Tiếng Anh</button>
+        <button class="btn btn-main" style="background:#475569" onclick="showTestOptions('Toán')">Môn Toán</button>
+    </div>
+
+    <div id="test-options" style="display:none">
+        <h2 id="current-subject"></h2>
+        <div style="background: var(--card); padding: 20px; border-radius: 15px; margin-bottom: 15px; text-align: center;">
+            <p>📷 Chọn nhiều ảnh đề cương:</p>
+            <input type="file" accept="image/*" id="cameraInput" multiple style="display:none" onchange="alert('Đã tải lên ' + this.files.length + ' ảnh đề cương!')">
+            <button class="btn" style="background:#334155; color:white" onclick="document.getElementById('cameraInput').click()">Chụp/Chọn nhiều ảnh</button>
+        </div>
+        <button class="btn btn-main" onclick="startTest('khảo sát')">Test Khảo Sát</button>
+        <button class="btn btn-main" style="background:#6366f1" onclick="startTest('kiểm tra')">Test Kiểm Tra</button>
+        <button class="btn" style="width:100%; background:transparent; color:#94a3b8" onclick="backToSubjects()">← Quay lại chọn môn</button>
+    </div>
+
+    <div id="test-screen" style="display:none">
+        <div class="header-test">
+            <div id="timer" class="timer-display">45:00</div>
+            <div id="test-mode-title">Chế độ: Khảo sát</div>
+        </div>
+        <div id="question-area"></div>
+        <div style="display:flex; gap:10px;">
+            <button class="btn" style="background:#ef4444; color:white; flex:1" onclick="exitTest()">Thoát bài</button>
+            <button class="btn" style="background:#22c55e; color:white; flex:1" onclick="submitTest()">Nộp bài</button>
+        </div>
+    </div>
+</div>
+
+<div id="page-rank" class="page">
+    <h2>🏆 Lịch Sử Leo Rank</h2>
+    <div id="rank-list"></div>
+</div>
+
+<div class="sidebar">
+    <div class="nav-item active" onclick="showPage('intro', this)">Giới thiệu</div>
+    <div class="nav-item" onclick="showPage('test', this)">Bài Test</div>
+    <div class="nav-item" onclick="showPage('rank', this)">Xếp hạng</div>
+</div>
+
+<script>
+    const questionsData = [
+        { q: "Pronunciation: skytrain, hyperloop, cycling, friendly", a: ["skytrain", "hyperloop", "cycling", "friendly"], c: 3, h: "Âm 'y' cuối khác với 'y' giữa.", e: "Friendly (/i/), các từ kia (/ai/)." },
+        { q: "Solar energy is __________, plentiful and clean.", a: ["renewable", "renewal", "renewing"], c: 0, h: "Nói về năng lượng tái tạo.", e: "Renewable là tính từ đúng." },
+        { q: "They ________ driverless cars in the future.", a: ["will have", "have", "had"], c: 0, h: "Dấu hiệu 'in the future'.", e: "Tương lai đơn dùng Will + V." }
+    ];
+
+    let currentMode = ''; 
+    let timeLeft = 2700;
+    let timerInterval;
+    let shuffledQ = [];
+    let userAnswers = {};
+
+    function showPage(pageId, el) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById('page-' + pageId).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    function showTestOptions(sub) {
+        document.getElementById('subject-menu').style.display = 'none';
+        document.getElementById('test-options').style.display = 'block';
+        document.getElementById('current-subject').innerText = 'Môn: ' + sub;
+    }
+
+    function backToSubjects() {
+        document.getElementById('subject-menu').style.display = 'block';
+        document.getElementById('test-options').style.display = 'none';
+    }
+
+    function startTest(mode) {
+        const name = document.getElementById('userName').value;
+        if(!name) { alert("Kiệt ơi, nhập tên ở mục Giới thiệu trước khi làm bài nhé!"); return; }
+        
+        currentMode = mode;
+        document.getElementById('test-options').style.display = 'none';
+        document.getElementById('test-screen').style.display = 'block';
+        initQuestions();
+        startTimer();
+    }
+
+    function exitTest() {
+        if(confirm("Bạn muốn thoát bài test này để làm môn khác?")) {
+            clearInterval(timerInterval);
+            document.getElementById('test-screen').style.display = 'none';
+            document.getElementById('subject-menu').style.display = 'block';
+        }
+    }
+
+    function startTimer() {
+        clearInterval(timerInterval);
+        timeLeft = 2700;
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            let m = Math.floor(timeLeft/60), s = timeLeft%60;
+            document.getElementById('timer').innerText = `${m<10?'0':''}${m}:${s<10?'0':''}${s}`;
+            if(timeLeft <= 0) submitTest();
+        }, 1000);
+    }
+
+    function initQuestions() {
+        shuffledQ = [...questionsData].sort(() => Math.random() - 0.5);
+        const area = document.getElementById('question-area');
+        area.innerHTML = '';
+        userAnswers = {};
+        shuffledQ.forEach((item, idx) => {
+            const card = document.createElement('div');
+            card.className = 'q-card';
+            card.innerHTML = `
+                <b>Câu ${idx+1}: ${item.q}</b>
+                <div>${item.a.map((opt, i) => `<button class="option" onclick="select(${idx},${i},this)">${opt}</button>`).join('')}</div>
+                <button class="btn" style="background:#422006; font-size:12px; color:#fbbf24" onclick="this.nextElementSibling.style.display='block'">💡 Gợi ý</button>
+                <div class="hint-box">${item.h}</div>
+                <div class="explain-box" id="exp-${idx}">✅ Giải thích: ${item.e}</div>
+            `;
+            area.appendChild(card);
+        });
+    }
+
+    window.select = (qIdx, aIdx, btn) => {
+        const card = btn.parentElement;
+        Array.from(card.querySelectorAll('.option')).forEach(b => b.className = 'option');
+        btn.classList.add('selected');
+        userAnswers[qIdx] = aIdx;
+        if(currentMode === 'khảo sát') {
+            btn.className = aIdx === shuffledQ[qIdx].c ? 'option correct' : 'option wrong';
+            document.getElementById('exp-'+qIdx).style.display = 'block';
+        }
+    }
+
+    function submitTest() {
+        clearInterval(timerInterval);
+        let score = 0;
+        shuffledQ.forEach((item, i) => { if(userAnswers[i] === item.c) score++; });
+        
+        const percent = (score / shuffledQ.length) * 100;
+        let rank = percent >= 100 ? "Thánh Tri Thức 👑" : percent >= 99 ? "Thách Đấu ⚔️" : percent >= 80 ? "Huyền Thoại 🎖️" : percent >= 50 ? "Kim Cương 💎" : "Đồng 🥉";
+
+        const name = document.getElementById('userName').value;
+        updateRankUI(name, rank, score);
+        alert(`${name} hoàn thành!\nĐiểm: ${score}/${shuffledQ.length}\nRank: ${rank}`);
+        exitTest();
+    }
+
+    function updateRankUI(name, rank, score) {
+        const list = document.getElementById('rank-list');
+        list.innerHTML = `<div class="rank-card">
+            <div><b>${name}</b><br><small>${rank}</small></div>
+            <div style="color:var(--gold)">${score} Câu</div>
+        </div>` + list.innerHTML;
+    }
+</script>
+</body>
+</html>
