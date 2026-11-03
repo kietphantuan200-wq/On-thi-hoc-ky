@@ -4,16 +4,93 @@
 <script>
 (function(){
   var s=document.createElement('style');
-  s.textContent=':root{--bg:#faf9f4;--card:#ffffff;--text:#0f172a;--muted:#64748b;--accent:#297a2e;--accent-soft:rgba(41,122,46,.14);--accent2:#d97706;--accent2-soft:rgba(217,119,6,.14);--border:rgba(15,23,42,.08);--wrong:#dc2626;--wrong-soft:rgba(220,38,38,.1);}body{font-family:"Fredoka",sans-serif;background:var(--bg);color:var(--text);}*{box-sizing:border-box;}.opt{transition:border-color .15s,background .15s;cursor:pointer;border:2px solid var(--border);background:#fff;}.opt:hover:not(.locked){border-color:var(--accent);background:var(--accent-soft);}.opt.correct{border-color:var(--accent);background:var(--accent-soft);}.opt.wrong{border-color:var(--wrong);background:var(--wrong-soft);}.opt.locked{cursor:default;}.opt.dim{opacity:.45;}.badge{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:10px;font-weight:600;flex-shrink:0;}.btn{transition:all .15s ease;cursor:pointer;user-select:none;}.btn:active{transform:scale(.97);}.progress-fill{transition:width .4s ease;}.qnav{width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:#fff;transition:all .15s;}.qnav:hover{border-color:var(--accent);}.qnav.done-ok{background:var(--accent);color:#fff;border-color:var(--accent);}.qnav.done-no{background:var(--wrong);color:#fff;border-color:var(--wrong);}.qnav.current{border-color:var(--accent2);box-shadow:0 0 0 2px var(--accent2-soft);}';
+  s.textContent='*{box-sizing:border-box;}body{font-family:"Fredoka",sans-serif;margin:0;}#app{position:relative;min-height:100%;transition:background .4s ease;overflow:hidden;}.opt{transition:border-color .15s,background .15s;cursor:pointer;border:2px solid var(--border);background:#fff;}.opt:hover:not(.locked){border-color:var(--accent);background:var(--accent-soft);}.opt.correct{border-color:var(--accent);background:var(--accent-soft);}.opt.wrong{border-color:var(--wrong);background:var(--wrong-soft);}.opt.locked{cursor:default;}.opt.dim{opacity:.45;}.badge{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:10px;font-weight:600;flex-shrink:0;}.btn{transition:all .15s ease;cursor:pointer;user-select:none;}.btn:active{transform:scale(.97);}.progress-fill{transition:width .4s ease;}.card{background:var(--card);border:1px solid var(--border);border-radius:20px;box-shadow:0 8px 30px rgba(15,23,42,.06);position:relative;z-index:2;}.subject-card{cursor:pointer;transition:transform .2s,box-shadow .2s;}.subject-card:hover{transform:translateY(-4px);box-shadow:0 14px 36px rgba(15,23,42,.12);}input[type=text]{font-family:inherit;}.lb-row{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-radius:12px;margin-bottom:6px;background:var(--bg);border:1px solid var(--border);}#banana{position:absolute;z-index:50;cursor:pointer;width:70px;height:80px;will-change:transform;}';
   document.head.appendChild(s);
 })();
 </script>
-<div style="background-color:transparent;box-sizing:border-box;padding:20px 12px;">
-  <div id="app" style="max-width:680px;margin:0 auto;"></div>
+<div id="app" style="padding:20px 12px;">
+  <div id="main" style="max-width:680px;margin:0 auto;position:relative;z-index:2;"></div>
+  <div id="banana"></div>
 </div>
 <script>
 (function(){
-var Q=[
+/* ============ AUDIO ============ */
+var actx=null;
+function ensureAudio(){ try{ if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==='suspended') actx.resume(); }catch(e){} }
+function tone(freq,dur,type,vol){ try{ ensureAudio(); var o=actx.createOscillator(),g=actx.createGain(); o.connect(g);g.connect(actx.destination); o.type=type||'sine'; o.frequency.value=freq; g.gain.setValueAtTime(vol||0.12,actx.currentTime); g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+dur); o.start(); o.stop(actx.currentTime+dur); }catch(e){} }
+function tick(){ tone(660,0.07,'sine',0.08); }
+function okSound(){ tone(523,0.12,'sine',0.12); setTimeout(function(){tone(784,0.18,'sine',0.12);},100); }
+function noSound(){ tone(180,0.25,'square',0.08); }
+function winSound(){ [523,659,784,1047].forEach(function(f,i){setTimeout(function(){tone(f,0.2,'sine',0.12);},i*120);}); }
+function boing(){ try{ ensureAudio(); var o=actx.createOscillator(),g=actx.createGain(); o.connect(g);g.connect(actx.destination); o.type='sine'; var t=actx.currentTime; o.frequency.setValueAtTime(180,t); o.frequency.exponentialRampToValueAtTime(750,t+0.12); o.frequency.exponentialRampToValueAtTime(280,t+0.32); g.gain.setValueAtTime(0.18,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.4); o.start(t); o.stop(t+0.4); }catch(e){} }
+
+/* ============ BANANA CHARACTER ============ */
+var bananaEl=document.getElementById("banana");
+bananaEl.innerHTML='<svg viewBox="0 0 70 80" width="70" height="80" xmlns="http://www.w3.org/2000/svg">'+
+  '<g id="bn-body">'+
+  '<path d="M14,58 C6,40 12,14 38,10 C52,8 62,16 60,28 C58,36 52,40 46,37 C41,35 40,28 44,22 C39,20 28,23 24,33 C20,42 21,52 27,57 C31,60 29,64 24,64 C17,64 16,60 14,58 Z" fill="#fde047" stroke="#a16207" stroke-width="2.5" stroke-linejoin="round"/>'+
+  '<ellipse cx="38" cy="10" rx="5" ry="4" fill="#78350f"/>'+
+  '<circle cx="30" cy="30" r="5.5" fill="#fff" stroke="#a16207" stroke-width="1.2"/><circle cx="31.5" cy="31" r="2.6" fill="#1f2937"/>'+
+  '<circle cx="44" cy="29" r="5.5" fill="#fff" stroke="#a16207" stroke-width="1.2"/><circle cx="45.5" cy="30" r="2.6" fill="#1f2937"/>'+
+  '<path d="M32,40 Q38,45 45,40" fill="none" stroke="#7c2d12" stroke-width="2" stroke-linecap="round"/>'+
+  '<path d="M14,42 Q6,46 8,54" fill="none" stroke="#a16207" stroke-width="3" stroke-linecap="round"/><circle cx="8" cy="55" r="3.5" fill="#fde047" stroke="#a16207" stroke-width="1.5"/>'+
+  '<path d="M60,40 Q68,44 66,52" fill="none" stroke="#a16207" stroke-width="3" stroke-linecap="round"/><circle cx="66" cy="53" r="3.5" fill="#fde047" stroke="#a16207" stroke-width="1.5"/>'+
+  '<path d="M28,64 L26,74" stroke="#a16207" stroke-width="3" stroke-linecap="round"/><ellipse cx="24" cy="75" rx="5" ry="3" fill="#a16207"/>'+
+  '<path d="M42,64 L44,74" stroke="#a16207" stroke-width="3" stroke-linecap="round"/><ellipse cx="46" cy="75" rx="5" ry="3" fill="#a16207"/>'+
+  '</g></svg>';
+
+var bn={x:20,y:20,vx:1.3,vy:0.9,w:70,h:80,jumpStart:0,jumping:false,face:1};
+var app=document.getElementById("app");
+function bananaLoop(now){
+  var W=Math.max(app.clientWidth-70,100);
+  var H=Math.min(Math.max(app.clientHeight-80,300),560);
+  bn.x+=bn.vx; bn.y+=bn.vy;
+  if(bn.x<=0){bn.x=0;bn.vx=Math.abs(bn.vx);bn.face=1;}
+  if(bn.x>=W){bn.x=W;bn.vx=-Math.abs(bn.vx);bn.face=-1;}
+  if(bn.y<=0){bn.y=0;bn.vy=Math.abs(bn.vy);}
+  if(bn.y>=H){bn.y=H;bn.vy=-Math.abs(bn.vy);}
+  var jy=0, scaleStr="";
+  if(bn.jumping){
+    var t=(now-bn.jumpStart)/450;
+    if(t>=1){bn.jumping=false;}
+    else{ jy=-Math.sin(t*Math.PI)*110; var st=Math.sin(t*Math.PI); scaleStr=" scaleY("+(1+st*0.25)+") scaleX("+(1-st*0.15)+")"; }
+  }
+  bananaEl.style.transform="translate("+bn.x+"px,"+(bn.y+jy)+"px) scaleX("+bn.face+")"+scaleStr;
+  requestAnimationFrame(bananaLoop);
+}
+requestAnimationFrame(bananaLoop);
+bananaEl.addEventListener("click",function(e){
+  e.stopPropagation();
+  boing();
+  bn.jumping=true; bn.jumpStart=performance.now();
+  bn.vx=(Math.random()<0.5?-1:1)*(0.8+Math.random()*1.2);
+  bn.vy=(Math.random()<0.5?-1:1)*(0.6+Math.random()*1.0);
+});
+
+/* ============ DATA ============ */
+var LSD=[
+{q:"Lực lượng lãnh đạo cuộc Cách mạng tư sản Anh thế kỉ XVII là:",o:["Giai cấp công nhân và nông dân.","Tư sản và Quý tộc mới.","Tăng lữ và Quý tộc phong kiến.","Chủ nô và tư sản."],a:1},
+{q:"Đỉnh cao của cuộc Cách mạng tư sản Pháp cuối thế kỉ XVIII gắn liền với sự cầm quyền của phái nào?",o:["Phái Lập hiến.","Phái Gi-rông-đanh.","Phái Gia-cô-banh (Chuyên chính dân chủ cách mạng).","Phái Hoàng gia."],a:2},
+{q:"Phát minh nào khởi đầu cho cuộc Cách mạng công nghiệp ở Anh giữa thế kỉ XVIII?",o:["Máy hơi nước của Giêm Oát.","Máy kéo sợi Ghen-ni của Giê-mơ Han-gri-vơ.","Động cơ đốt trong.","Đầu máy xe lửa."],a:1},
+{q:"Động cơ hơi nước do Giêm Oát chế tạo hoàn chỉnh vào năm nào?",o:["1764.","1769.","1784.","1807."],a:2},
+{q:"Quốc gia duy nhất ở khu vực Đông Nam Á giữ được nền độc lập tương đối trước sự xâm lược của thực dân phương Tây là:",o:["Đại Việt.","Xiêm (Thái Lan).","Ma-lắc-ca.","Chân Lạp."],a:1},
+{q:"Vương triều Mạc được thành lập vào năm nào?",o:["1527.","1533.","1592.","1600."],a:0},
+{q:"Ai là người có công đặt nền móng cho cơ nghiệp chúa Nguyễn ở Đàng Trong khi vào trấn thủ Thuận Hóa năm 1558?",o:["Nguyễn Kim.","Nguyễn Hoàng.","Nguyễn Phúc Nguyên.","Nguyễn Ánh."],a:1},
+{q:"Ranh giới chia cắt đất nước thành Đàng Trong và Đàng Ngoài trong hơn 1 thế kỉ là:",o:["Sông Bến Hải.","Sông Gianh (Quảng Trị).","Sông Mã.","Đèo Hải Vân."],a:1},
+{q:"Lực lượng chính tham gia các cuộc khởi nghĩa nông dân ở Đàng Ngoài thế kỉ XVIII là:",o:["Nông dân nghèo.","Thợ thủ công.","Thương nhân.","Quý tộc."],a:0},
+{q:"Đội Hoàng Sa và Đội Bắc Hải được thành lập dưới thời các chúa Nguyễn có nhiệm vụ chính là:",o:["Thu thuế thương chánh.","Thăm dò, khai thác sản vật, thu gom hàng hóa và dựng mốc chủ quyền ở Hoàng Sa - Trường Sa.","Đánh dẹp cướp biển.","Mở rộng buôn bán với nước ngoài."],a:1},
+{q:"Điểm cực Bắc phần đất liền nước ta thuộc xã Lũng Cú, tỉnh nào?",o:["Tuyên Quang.","Lào Cai.","Cao Bằng.","Lạng Sơn."],a:0},
+{q:"Điểm cực Nam phần đất liền nước ta nằm ở tọa độ địa lí nào?",o:["8°34'B.","23°23'B.","102°09'Đ.","109°24'Đ."],a:0},
+{q:"Địa hình đồi núi chiếm bao nhiêu phần diện tích phần đất liền Việt Nam?",o:["1/4.","1/2.","2/3.","3/4."],a:3},
+{q:"Hướng nghiêng chung của địa hình Việt Nam là:",o:["Bắc - Nam.","Tây - Đông.","Tây Bắc - Đông Nam.","Đông Bắc - Tây Nam."],a:2},
+{q:"Dãy núi nào sau đây ở nước ta chạy theo hướng Tây Bắc - Đông Nam?",o:["Hoàng Liên Sơn.","Bắc Sơn.","Ngân Sơn.","Đông Triều."],a:0},
+{q:"Đỉnh núi cao nhất Việt Nam và toàn bộ bán đảo Đông Dương là:",o:["Ngọc Linh.","Phan-xi-păng.","Tây Côn Lĩnh.","Pu Si Lung."],a:1},
+{q:"Loại khoáng sản có trữ lượng lớn nhất và tập trung chủ yếu ở vùng Đông Bắc nước ta là:",o:["Dầu mỏ.","Than đá.","Bô-xít.","Sắt."],a:1},
+{q:"Đường bờ biển nước ta có chiều dài khoảng bao nhiêu ki-lô-mét?",o:["2 360 km.","3 260 km.","4 500 km.","1 000 km."],a:1},
+{q:"Loại đất chiếm diện tích lớn nhất ở vùng đồi núi nước ta là:",o:["Đất phù sa.","Đất Fe-ra-lít.","Đất xám bạc màu.","Đất mùn núi cao."],a:1},
+{q:"Nước ta có nguồn tài nguyên khoáng sản phong phú là do:",o:["Nằm ở trung tâm Châu Á.","Nằm ở vị trí giao nhau giữa các vành đai sinh khoáng lớn.","Có nhiều đồng bằng rộng lớn.","Khí hậu nhiệt đới ẩm mưa nhiều."],a:1}
+];
+var CN=[
 {q:"Theo tiêu chuẩn TCVN 7285:2003, khổ giấy A4 có kích thước là bao nhiêu?",o:["841 x 1189 mm.","594 x 841 mm.","297 x 420 mm.","210 x 297 mm."],a:3},
 {q:"Loại nét vẽ nào sau đây được sử dụng để vẽ đường khung bản vẽ và đường khung tên?",o:["Nét liền mảnh.","Nét liền đậm.","Nét đứt mảnh.","Nét gạch chấm mảnh."],a:1},
 {q:"Tỉ lệ 1:2 ghi trên bản vẽ kỹ thuật thể hiện loại tỉ lệ nào?",o:["Tỉ lệ nguyên hình.","Tỉ lệ phóng to.","Tỉ lệ thu nhỏ.","Tỉ lệ tự do."],a:2},
@@ -56,148 +133,244 @@ var Q=[
 {q:"Theo tiêu chuẩn TCVN 7285:2003, khổ giấy A1 có kích thước là bao nhiêu?",o:["841 x 1189 mm.","594 x 841 mm.","297 x 420 mm.","210 x 297 mm."],a:1}
 ];
 var letters=["A","B","C","D"];
-var app=document.getElementById("app");
-var state={idx:0,score:0,answers:[]};
-for(var i=0;i<Q.length;i++) state.answers.push(null);
+var SUBJECTS={
+  lsdl:{key:"lsdl",name:"Lịch Sử - Địa Lí 8",short:"LS-ĐL",q:LSD,count:20,accent:"#b45309",accentSoft:"rgba(180,83,9,.14)",accent2:"#2d6b8a",bg:"#fbf6ee",card:"#ffffff",text:"#0f172a",muted:"#64748b",border:"rgba(15,23,42,.07)",wrong:"#dc2626",wrongSoft:"rgba(220,38,38,.1)"},
+  cn:{key:"cn",name:"Công Nghệ 8 (Vẽ Kỹ Thuật)",short:"CN",q:CN,count:40,accent:"#0d7a8a",accentSoft:"rgba(13,122,138,.14)",accent2:"#c47046",bg:"#eef5f7",card:"#ffffff",text:"#0f172a",muted:"#64748b",border:"rgba(15,23,42,.07)",wrong:"#dc2626",wrongSoft:"rgba(220,38,38,.1)"}
+};
+var HOME={bg:"#faf9f4",accent:"#297a2e",accentSoft:"rgba(41,122,46,.14)",accent2:"#d97706",text:"#0f172a",muted:"#64748b",border:"rgba(15,23,42,.08)",card:"#ffffff"};
 
-function navHtml(){
-  var h='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:16px;">';
-  for(var i=0;i<Q.length;i++){
-    var cls="qnav";
-    if(state.answers[i]!==null) cls+= state.answers[i].ok?" done-ok":" done-no";
-    if(i===state.idx) cls+=" current";
-    h+='<span class="'+cls+'" data-jump="'+i+'">'+(i+1)+'</span>';
-  }
-  h+='</div>';
-  return h;
+var main=document.getElementById("main");
+var state={name:"",subject:null,idx:0,score:0,answers:[],saved:false};
+
+function applyTheme(t){
+  app.style.background=t.bg;
+  var root=document.documentElement.style;
+  root.setProperty('--accent',t.accent); root.setProperty('--accent-soft',t.accentSoft);
+  root.setProperty('--accent2',t.accent2); root.setProperty('--bg',t.bg);
+  root.setProperty('--card',t.card); root.setProperty('--text',t.text);
+  root.setProperty('--muted',t.muted); root.setProperty('--border',t.border);
+  root.setProperty('--wrong',t.wrong); root.setProperty('--wrong-soft',t.wrongSoft);
 }
 
-function renderStart(){
-  state.idx=0;state.score=0;
-  for(var i=0;i<Q.length;i++) state.answers[i]=null;
-  app.innerHTML='<div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:36px 28px;text-align:center;box-shadow:0 8px 30px rgba(15,23,42,.06);">'+
-    '<div style="display:inline-block;background:var(--accent-soft);color:var(--accent);padding:6px 16px;border-radius:999px;font-size:13px;font-weight:600;margin-bottom:18px;">40 CÂU TRẮC NGHIỆM</div>'+
-    '<h1 style="font-size:28px;font-weight:700;margin:0 0 8px;line-height:1.25;">Quiz Ôn Tập<br>Công Nghệ 8 - Vẽ Kỹ Thuật</h1>'+
-    '<p style="color:var(--muted);font-size:14px;margin:0 0 6px;">Giữa học kỳ I · Năm học 2026 - 2027 · Từ bài 1 đến bài 4</p>'+
-    '<p style="color:var(--accent2);font-size:13px;margin:0 0 24px;font-weight:500;">Đề thực tế là môn Công Nghệ (vẽ kỹ thuật), không phải Vật lý</p>'+
-    '<div style="display:flex;gap:12px;justify-content:center;margin-bottom:28px;flex-wrap:wrap;">'+
-      '<div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px 18px;min-width:90px;"><div style="font-size:22px;font-weight:700;color:var(--accent);">40</div><div style="font-size:12px;color:var(--muted);">câu hỏi</div></div>'+
-      '<div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px 18px;min-width:90px;"><div style="font-size:22px;font-weight:700;color:var(--accent2);">4</div><div style="font-size:12px;color:var(--muted);">lựa chọn</div></div>'+
-      '<div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px 18px;min-width:90px;"><div style="font-size:22px;font-weight:700;color:#0f172a;">45</div><div style="font-size:12px;color:var(--muted);">phút (tham khảo)</div></div>'+
+function lbKey(k){return "quiz_lb_"+k;}
+function getLB(k){try{return JSON.parse(localStorage.getItem(lbKey(k))||"[]");}catch(e){return[];}}
+function saveLB(k,name,score,total){
+  var d=getLB(k);
+  d.push({name:name,score:score,total:total,pct:Math.round(score/total*100),date:new Date().toLocaleDateString("vi-VN")});
+  localStorage.setItem(lbKey(k),JSON.stringify(d.slice(-200)));
+}
+function aggregateLB(k){
+  var d=getLB(k), map={};
+  d.forEach(function(e){
+    var key=e.name.toLowerCase();
+    if(!map[key] || e.pct>map[key].pct){ map[key]={name:e.name,score:e.score,total:e.total,pct:e.pct,date:e.date,attempts:(map[key]?map[key].attempts:0)+1}; }
+    else { map[key].attempts++; }
+  });
+  var arr=[]; for(var k2 in map) arr.push(map[k2]);
+  arr.sort(function(a,b){return b.pct-a.pct||b.score-a.score;});
+  return arr;
+}
+
+document.addEventListener('click',function(e){ if(e.target.closest('.btn,.opt,.subject-card,input[type=text]')){ tick(); } },true);
+
+/* ============ SCREENS ============ */
+function renderWelcome(){
+  applyTheme(HOME); state.saved=false;
+  var topLS=aggregateLB("lsdl"), topCN=aggregateLB("cn");
+  var lsTop=topLS.length>0?topLS[0].name+" ("+topLS[0].pct+"%)":"Chưa có";
+  var cnTop=topCN.length>0?topCN[0].name+" ("+topCN[0].pct+"%)":"Chưa có";
+  main.innerHTML='<div class="card" style="padding:36px 28px;text-align:center;">'+
+    '<div style="font-size:40px;margin-bottom:6px;">✎</div>'+
+    '<h1 style="font-size:26px;font-weight:700;margin:0 0 6px;line-height:1.25;">Chào mừng bạn!</h1>'+
+    '<p style="color:var(--muted);font-size:14px;margin:0 0 4px;">Luyện thi trắc nghiệm tương tác</p>'+
+    '<p style="color:var(--accent2);font-size:12px;margin:0 0 22px;font-weight:500;">2 môn: LS-ĐL (20 câu) · Công Nghệ (40 câu) · Bấm vào chuối vàng để xem nó nhảy!</p>'+
+    '<div style="max-width:340px;margin:0 auto 18px;text-align:left;">'+
+      '<label style="display:block;font-size:14px;font-weight:600;margin-bottom:8px;">Nhập tên của bạn:</label>'+
+      '<input id="nameInput" type="text" placeholder="VD: Nguyễn Văn A" value="'+state.name+'" style="width:100%;padding:14px 16px;border:2px solid var(--border);border-radius:14px;font-size:16px;outline:none;background:#fff;" onfocus="this.style.borderColor=\'var(--accent)\'" onblur="this.style.borderColor=\'var(--border)\'">'+
     '</div>'+
-    '<button id="startBtn" class="btn" style="background:var(--accent);color:#fff;border:none;padding:14px 40px;border-radius:14px;font-size:16px;font-weight:600;font-family:inherit;box-shadow:0 4px 14px rgba(41,122,46,.3);">Bắt đầu làm bài</button>'+
-  '</div>';
-  document.getElementById("startBtn").onclick=function(){renderQuestion();};
+    '<button id="enterBtn" class="btn" style="background:var(--accent);color:#fff;border:none;padding:14px 44px;border-radius:14px;font-size:16px;font-weight:600;font-family:inherit;box-shadow:0 4px 14px rgba(41,122,46,.3);">Vào thi →</button>'+
+    '<div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--border);">'+
+      '<p style="font-size:12px;color:var(--muted);margin:0 0 12px;font-weight:600;">🏆 BẢNG XẾP HẠNG CÔNG KHAI</p>'+
+      '<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">'+
+        '<button class="btn" data-publb="lsdl" style="flex:1;min-width:150px;background:#fbf6ee;color:#b45309;border:2px solid #b45309;padding:11px;border-radius:12px;font-size:13px;font-weight:600;font-family:inherit;">BXH LS-ĐL<div style="font-size:11px;font-weight:500;opacity:.8;margin-top:2px;">#1: '+lsTop+'</div></button>'+
+        '<button class="btn" data-publb="cn" style="flex:1;min-width:150px;background:#eef5f7;color:#0d7a8a;border:2px solid #0d7a8a;padding:11px;border-radius:12px;font-size:13px;font-weight:600;font-family:inherit;">BXH Công Nghệ<div style="font-size:11px;font-weight:500;opacity:.8;margin-top:2px;">#1: '+cnTop+'</div></button>'+
+      '</div></div></div>';
+  var ni=document.getElementById("nameInput");
+  ni.addEventListener('keydown',function(e){if(e.key==='Enter'){enter();}});
+  document.getElementById("enterBtn").onclick=enter;
+  function enter(){ var v=ni.value.trim(); if(!v){ ni.style.borderColor="#dc2626"; ni.placeholder="Vui lòng nhập tên!"; return; } state.name=v.substring(0,30); renderMenu(); }
+  document.querySelectorAll("[data-publb]").forEach(function(el){ el.onclick=function(){ renderLeaderboard(el.getAttribute("data-publb"), true); }; });
 }
 
-function renderQuestion(){
-  var i=state.idx, item=Q[i];
-  var pct=Math.round((i/Q.length)*100);
+function renderMenu(){
+  applyTheme(HOME);
+  var lbLS=aggregateLB("lsdl"), lbCN=aggregateLB("cn");
+  var topLS=lbLS.length>0?lbLS[0].name+" ("+lbLS[0].pct+"%)":"Chưa có";
+  var topCN=lbCN.length>0?lbCN[0].name+" ("+lbCN[0].pct+"%)":"Chưa có";
+  main.innerHTML='<div>'+
+    '<div style="text-align:center;margin-bottom:22px;">'+
+      '<div style="display:inline-block;background:var(--accent-soft);color:var(--accent);padding:6px 16px;border-radius:999px;font-size:13px;font-weight:600;margin-bottom:10px;">Xin chào</div>'+
+      '<h1 style="font-size:26px;font-weight:700;margin:0 0 4px;">'+state.name+'</h1>'+
+      '<p style="color:var(--muted);font-size:14px;margin:0;">Chọn môn bạn muốn luyện tập</p></div>'+
+    '<div class="card subject-card" data-sub="lsdl" style="padding:22px;margin-bottom:14px;border-left:6px solid #b45309;">'+
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;">'+
+        '<div><h3 style="font-size:18px;font-weight:700;margin:0 0 4px;color:#b45309;">Lịch Sử - Địa Lí 8</h3>'+
+        '<p style="font-size:13px;color:var(--muted);margin:0 0 8px;">20 câu · Giữa kỳ I</p>'+
+        '<span style="font-size:12px;background:#fbf6ee;color:#b45309;padding:4px 10px;border-radius:999px;font-weight:600;">🏆 #1: '+topLS+'</span></div>'+
+        '<div style="font-size:34px;font-weight:700;color:#b45309;">20</div></div></div>'+
+    '<div class="card subject-card" data-sub="cn" style="padding:22px;margin-bottom:18px;border-left:6px solid #0d7a8a;">'+
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;">'+
+        '<div><h3 style="font-size:18px;font-weight:700;margin:0 0 4px;color:#0d7a8a;">Công Nghệ 8 (Vẽ Kỹ Thuật)</h3>'+
+        '<p style="font-size:13px;color:var(--muted);margin:0 0 8px;">40 câu · Giữa kỳ I</p>'+
+        '<span style="font-size:12px;background:#eef5f7;color:#0d7a8a;padding:4px 10px;border-radius:999px;font-weight:600;">🏆 #1: '+topCN+'</span></div>'+
+        '<div style="font-size:34px;font-weight:700;color:#0d7a8a;">40</div></div></div>'+
+    '<div style="display:flex;gap:10px;flex-wrap:wrap;">'+
+      '<button class="btn" data-lb="lsdl" style="flex:1;min-width:120px;background:#fff;color:#b45309;border:2px solid #b45309;padding:11px;border-radius:14px;font-size:13px;font-weight:600;font-family:inherit;">BXH LS-ĐL</button>'+
+      '<button class="btn" data-lb="cn" style="flex:1;min-width:120px;background:#fff;color:#0d7a8a;border:2px solid #0d7a8a;padding:11px;border-radius:14px;font-size:13px;font-weight:600;font-family:inherit;">BXH CN</button>'+
+      '<button class="btn" id="changeName" style="flex:1;min-width:120px;background:#fff;color:var(--muted);border:2px solid var(--border);padding:11px;border-radius:14px;font-size:13px;font-weight:600;font-family:inherit;">Đổi tên</button>'+
+    '</div></div>';
+  document.querySelectorAll(".subject-card").forEach(function(el){ el.onclick=function(){ startQuiz(el.getAttribute("data-sub")); }; });
+  document.querySelectorAll("[data-lb]").forEach(function(el){ el.onclick=function(){ renderLeaderboard(el.getAttribute("data-lb"), false); }; });
+  document.getElementById("changeName").onclick=function(){ renderWelcome(); };
+}
+
+function startQuiz(key){
+  state.subject=SUBJECTS[key]; state.idx=0; state.score=0; state.saved=false; state.answers=[];
+  for(var i=0;i<state.subject.q.length;i++) state.answers.push(null);
+  renderQuiz();
+}
+
+function renderQuiz(){
+  var sub=state.subject; applyTheme(sub);
+  var i=state.idx, item=sub.q[i];
+  var pct=Math.round((i/sub.q.length)*100);
   var answered=state.answers[i]!==null;
   var optsHtml="";
   for(var k=0;k<4;k++){
     var extra="";
-    if(answered){
-      if(k===item.a) extra=" correct";
-      else if(k===state.answers[i].chosen) extra=" wrong";
-      else extra=" dim";
-    }
-    optsHtml+='<div class="opt'+extra+(answered?" locked":"")+'" data-i="'+k+'" style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:14px;margin-bottom:10px;">'+
+    if(answered){ if(k===item.a) extra=" correct"; else if(k===state.answers[i].chosen) extra=" wrong"; else extra=" dim"; }
+    optsHtml+='<div class="opt'+extra+(answered?" locked":"")+'" data-i="'+k+'" style="display:flex;align-items:flex-start;gap:12px;padding:13px 15px;border-radius:14px;margin-bottom:10px;">'+
       '<span class="badge" style="background:var(--bg);border:1.5px solid var(--border);color:var(--muted);font-size:14px;">'+letters[k]+'</span>'+
       '<span style="font-size:15px;line-height:1.5;padding-top:4px;">'+item.o[k]+'</span></div>';
   }
   var fbHtml="";
-  if(answered){
-    var ok=state.answers[i].ok;
+  if(answered){ var ok=state.answers[i].ok;
     fbHtml='<div style="margin-top:6px;margin-bottom:14px;padding:12px 16px;border-radius:12px;font-size:14px;font-weight:500;line-height:1.5;background:'+(ok?"var(--accent-soft)":"var(--wrong-soft)")+';color:'+(ok?"var(--accent)":"var(--wrong)")+';">'+
-      (ok?'<span style="font-weight:700;">Chính xác!</span> Đáp án đúng là '+letters[item.a]+'.':
-      '<span style="font-weight:700;">Chưa đúng.</span> Đáp án đúng là <b>'+letters[item.a]+'</b>: '+item.o[item.a])+'</div>';
+      (ok?'<span style="font-weight:700;">Chính xác!</span> Đáp án đúng là '+letters[item.a]+'.':'<span style="font-weight:700;">Chưa đúng.</span> Đáp án đúng là <b>'+letters[item.a]+'</b>: '+item.o[item.a])+'</div>';
   }
-  var nextLabel=(i===Q.length-1)?"Xem kết quả":"Câu tiếp theo";
-  app.innerHTML='<div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px 20px;box-shadow:0 8px 30px rgba(15,23,42,.06);">'+
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">'+
-      '<span style="font-size:13px;font-weight:600;color:var(--muted);">Câu '+(i+1)+' / '+Q.length+'</span>'+
-      '<span style="font-size:12px;font-weight:600;color:var(--accent);">Đã đúng: '+state.score+'</span>'+
-    '</div>'+
-    '<div style="height:8px;background:var(--bg);border-radius:999px;overflow:hidden;margin-bottom:20px;"><div class="progress-fill" style="height:100%;width:'+pct+'%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:999px;"></div></div>'+
-    '<h2 style="font-size:17px;font-weight:600;margin:0 0 18px;line-height:1.5;">'+item.q+'</h2>'+
-    '<div id="opts">'+optsHtml+'</div>'+
-    fbHtml+
+  var nextLabel=(i===sub.q.length-1)?"Hoàn thành & Xem kết quả":"Câu tiếp theo";
+  var nav='<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:16px;">';
+  for(var j=0;j<sub.q.length;j++){
+    var c="";
+    if(state.answers[j]!==null) c+= state.answers[j].ok?"background:var(--accent);color:#fff;border-color:var(--accent);":"background:var(--wrong);color:#fff;border-color:var(--wrong);";
+    if(j===i) c+="box-shadow:0 0 0 2px var(--accent2-soft);border-color:var(--accent2);";
+    nav+='<span data-jump="'+j+'" style="width:26px;height:26px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:#fff;'+c+'">'+(j+1)+'</span>';
+  }
+  nav+='</div>';
+  main.innerHTML='<div class="card" style="padding:22px 18px;">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">'+
+      '<span style="font-size:12px;font-weight:600;color:#fff;background:var(--accent);padding:4px 12px;border-radius:999px;">'+sub.short+'</span>'+
+      '<span style="font-size:13px;font-weight:600;color:var(--muted);">Câu '+(i+1)+' / '+sub.q.length+'</span>'+
+      '<span style="font-size:12px;font-weight:600;color:var(--accent);">Đúng: '+state.score+'</span></div>'+
+    '<div style="height:8px;background:var(--bg);border-radius:999px;overflow:hidden;margin-bottom:18px;"><div class="progress-fill" style="height:100%;width:'+pct+'%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:999px;"></div></div>'+
+    '<h2 style="font-size:17px;font-weight:600;margin:0 0 16px;line-height:1.5;">'+item.q+'</h2>'+
+    '<div id="opts">'+optsHtml+'</div>'+fbHtml+
     '<div style="display:flex;gap:10px;margin-top:6px;">'+
-      (i>0?'<button id="prevBtn" class="btn" style="flex:1;background:var(--bg);color:var(--text);border:1.5px solid var(--border);padding:13px;border-radius:14px;font-size:15px;font-weight:600;font-family:inherit;">Câu trước</button>':'')+
-      '<button id="nextBtn" class="btn" style="flex:2;background:'+(answered?"var(--accent)":"#e2e8f0")+';color:'+(answered?"#fff":"#94a3b8")+';border:none;padding:13px;border-radius:14px;font-size:15px;font-weight:600;font-family:inherit;" '+(answered?"":"disabled")+'>'+nextLabel+'</button>'+
-    '</div>'+
-    navHtml()+
-  '</div>';
-
+      '<button id="quitBtn" class="btn" style="flex:1;background:#fff;color:var(--muted);border:1.5px solid var(--border);padding:12px;border-radius:14px;font-size:13px;font-weight:600;font-family:inherit;">Thoát</button>'+
+      (i>0?'<button id="prevBtn" class="btn" style="flex:1;background:var(--bg);color:var(--text);border:1.5px solid var(--border);padding:12px;border-radius:14px;font-size:14px;font-weight:600;font-family:inherit;">Trước</button>':'')+
+      '<button id="nextBtn" class="btn" style="flex:2;background:'+(answered?"var(--accent)":"#e2e8f0")+';color:'+(answered?"#fff":"#94a3b8")+';border:none;padding:12px;border-radius:14px;font-size:14px;font-weight:600;font-family:inherit;" '+(answered?"":"disabled")+'>'+nextLabel+'</button></div>'+
+    nav+'</div>';
   if(!answered){
-    var optEls=document.querySelectorAll(".opt");
-    optEls.forEach(function(el){
+    document.querySelectorAll(".opt").forEach(function(el){
       el.onclick=function(){
         var chosen=parseInt(el.getAttribute("data-i"));
-        var correct=item.a;
-        var ok=(chosen===correct);
+        var ok=(chosen===item.a);
         state.answers[i]={ok:ok,chosen:chosen};
-        if(ok) state.score++;
-        renderQuestion();
+        if(ok){state.score++;okSound();}else{noSound();}
+        renderQuiz();
       };
     });
   }
-  document.getElementById("nextBtn").onclick=function(){
-    if(i===Q.length-1){renderResult();}
-    else{state.idx++;renderQuestion();}
-  };
-  var pb=document.getElementById("prevBtn");
-  if(pb) pb.onclick=function(){state.idx--;renderQuestion();};
-  document.querySelectorAll(".qnav").forEach(function(el){
-    el.onclick=function(){state.idx=parseInt(el.getAttribute("data-jump"));renderQuestion();};
-  });
+  document.getElementById("nextBtn").onclick=function(){ if(i===sub.q.length-1){ renderResult(); } else { state.idx++; renderQuiz(); } };
+  var pb=document.getElementById("prevBtn"); if(pb) pb.onclick=function(){state.idx--;renderQuiz();};
+  document.getElementById("quitBtn").onclick=function(){ renderMenu(); };
+  document.querySelectorAll("[data-jump]").forEach(function(el){ el.onclick=function(){state.idx=parseInt(el.getAttribute("data-jump"));renderQuiz();}; });
 }
 
 function renderResult(){
-  var sc=state.score, total=Q.length;
-  var pct=Math.round(sc/total*100);
+  var sub=state.subject; applyTheme(sub);
+  if(!state.saved){ saveLB(sub.key,state.name,state.score,sub.q.length); state.saved=true; winSound(); }
+  var sc=state.score,total=sub.q.length,pct=Math.round(sc/total*100);
   var msg,color;
-  if(pct>=90){msg="Xuất sắc!";color="var(--accent)";}
-  else if(pct>=70){msg="Khá tốt!";color="var(--accent)";}
-  else if(pct>=50){msg="Cần ôn thêm!";color="var(--accent2)";}
-  else{msg="Cần cố gắng hơn!";color="var(--wrong)";}
-  var wrongList="";
-  var wrongCount=0;
+  if(pct>=90){msg="Xuất sắc!";color="var(--accent)";}else if(pct>=70){msg="Khá tốt!";color="var(--accent)";}else if(pct>=50){msg="Cần ôn thêm!";color="var(--accent2)";}else{msg="Cần cố gắng hơn!";color="var(--wrong)";}
+  var lb=aggregateLB(sub.key); var rank=0;
+  for(var r=0;r<lb.length;r++){ if(lb[r].name.toLowerCase()===state.name.toLowerCase()){ rank=r+1; break; } }
+  var circle=2*Math.PI*52;
+  var wrongList="",wc=0;
   state.answers.forEach(function(a,idx){
-    if(a && !a.ok){
-      wrongCount++;
-      var item=Q[idx];
-      wrongList+='<div style="padding:12px 14px;border:1px solid var(--border);border-radius:12px;margin-bottom:10px;background:var(--bg);">'+
-        '<div style="font-size:13px;font-weight:600;color:var(--wrong);margin-bottom:4px;">Câu '+(idx+1)+' · Bạn chọn '+letters[a.chosen]+'</div>'+
-        '<div style="font-size:14px;line-height:1.5;margin-bottom:6px;">'+item.q+'</div>'+
-        '<div style="font-size:13px;color:var(--accent);font-weight:500;">Đáp án đúng: '+letters[item.a]+'. '+item.o[item.a]+'</div></div>';
+    if(a&&!a.ok){ wc++; var it=sub.q[idx];
+      wrongList+='<div style="padding:10px 14px;border:1px solid var(--border);border-radius:12px;margin-bottom:8px;background:var(--bg);">'+
+        '<div style="font-size:12px;font-weight:600;color:var(--wrong);margin-bottom:3px;">Câu '+(idx+1)+' · Bạn chọn '+letters[a.chosen]+'</div>'+
+        '<div style="font-size:13px;line-height:1.5;margin-bottom:4px;">'+it.q+'</div>'+
+        '<div style="font-size:12px;color:var(--accent);font-weight:500;">Đúng: '+letters[it.a]+'. '+it.o[it.a]+'</div></div>';
     }
   });
-  if(wrongCount===0) wrongList='<div style="text-align:center;color:var(--accent);font-weight:600;padding:20px;">Bạn đã làm đúng toàn bộ 40 câu!</div>';
-  var circle=2*Math.PI*52;
-  app.innerHTML='<div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px 20px;box-shadow:0 8px 30px rgba(15,23,42,.06);text-align:center;margin-bottom:16px;">'+
-    '<h2 style="font-size:22px;font-weight:700;margin:0 0 20px;">Kết quả của bạn</h2>'+
-    '<div style="position:relative;width:140px;height:140px;margin:0 auto 16px;">'+
-      '<svg width="140" height="140" viewBox="0 0 140 140">'+
-        '<circle cx="70" cy="70" r="52" fill="none" stroke="var(--bg)" stroke-width="12"/>'+
-        '<circle cx="70" cy="70" r="52" fill="none" stroke="'+color+'" stroke-width="12" stroke-linecap="round" stroke-dasharray="'+circle+'" stroke-dashoffset="'+(circle*(1-pct/100))+'" transform="rotate(-90 70 70)"/>'+
-      '</svg>'+
-      '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;">'+
-        '<div style="font-size:32px;font-weight:700;color:'+color+';">'+sc+'/'+total+'</div>'+
-        '<div style="font-size:13px;color:var(--muted);">'+pct+'%</div>'+
-      '</div></div>'+
-    '<div style="font-size:18px;font-weight:600;color:'+color+';margin-bottom:6px;">'+msg+'</div>'+
-    '<div style="font-size:14px;color:var(--muted);margin-bottom:20px;">Đúng '+sc+' câu · Sai '+(total-sc)+' câu</div>'+
-    '<button id="retryBtn" class="btn" style="background:var(--accent);color:#fff;border:none;padding:12px 32px;border-radius:14px;font-size:15px;font-weight:600;font-family:inherit;box-shadow:0 4px 14px rgba(41,122,46,.3);">Làm lại từ đầu</button>'+
-  '</div>'+
-  (wrongCount>0?'<div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:20px;box-shadow:0 8px 30px rgba(15,23,42,.06);">'+
-    '<h3 style="font-size:16px;font-weight:600;margin:0 0 14px;color:var(--wrong);">Những câu cần ôn lại ('+wrongCount+')</h3>'+
-    wrongList+'</div>':'');
-  document.getElementById("retryBtn").onclick=renderStart;
+  if(wc===0) wrongList='<div style="text-align:center;color:var(--accent);font-weight:600;padding:16px;">Bạn đã làm đúng toàn bộ '+total+' câu!</div>';
+  main.innerHTML='<div class="card" style="padding:26px 20px;text-align:center;margin-bottom:14px;">'+
+    '<div style="display:inline-block;background:var(--accent-soft);color:var(--accent);padding:5px 14px;border-radius:999px;font-size:12px;font-weight:600;margin-bottom:12px;">'+sub.name+'</div>'+
+    '<h2 style="font-size:19px;font-weight:700;margin:0 0 14px;">Kết quả của '+state.name+'</h2>'+
+    '<div style="position:relative;width:130px;height:130px;margin:0 auto 12px;">'+
+      '<svg width="130" height="130" viewBox="0 0 140 140"><circle cx="70" cy="70" r="52" fill="none" stroke="var(--bg)" stroke-width="12"/><circle cx="70" cy="70" r="52" fill="none" stroke="'+color+'" stroke-width="12" stroke-linecap="round" stroke-dasharray="'+circle+'" stroke-dashoffset="'+(circle*(1-pct/100))+'" transform="rotate(-90 70 70)"/></svg>'+
+      '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;"><div style="font-size:28px;font-weight:700;color:'+color+';">'+sc+'/'+total+'</div><div style="font-size:12px;color:var(--muted);">'+pct+'%</div></div></div>'+
+    '<div style="font-size:16px;font-weight:600;color:'+color+';margin-bottom:4px;">'+msg+'</div>'+
+    '<div style="font-size:13px;color:var(--muted);margin-bottom:4px;">Đúng '+sc+' · Sai '+(total-sc)+(rank>0?' · Hạng #'+rank+' / '+lb.length+' người':'')+'</div>'+
+    '<div style="font-size:12px;color:var(--accent);font-weight:600;margin-bottom:18px;">✓ Đã lưu công khai vào BXH</div>'+
+    '<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">'+
+      '<button class="btn" id="retryBtn" style="background:var(--accent);color:#fff;border:none;padding:11px 22px;border-radius:14px;font-size:13px;font-weight:600;font-family:inherit;">Làm lại</button>'+
+      '<button class="btn" id="lbBtn" style="background:#fff;color:var(--accent);border:2px solid var(--accent);padding:11px 22px;border-radius:14px;font-size:13px;font-weight:600;font-family:inherit;">Xem BXH</button>'+
+      '<button class="btn" id="menuBtn" style="background:#fff;color:var(--muted);border:2px solid var(--border);padding:11px 22px;border-radius:14px;font-size:13px;font-weight:600;font-family:inherit;">Về menu</button></div></div>'+
+    (wc>0?'<div class="card" style="padding:16px;"><h3 style="font-size:15px;font-weight:600;margin:0 0 10px;color:var(--wrong);">Câu cần ôn lại ('+wc+')</h3>'+wrongList+'</div>':'');
+  document.getElementById("retryBtn").onclick=function(){startQuiz(sub.key);};
+  document.getElementById("lbBtn").onclick=function(){renderLeaderboard(sub.key,false);};
+  document.getElementById("menuBtn").onclick=function(){renderMenu();};
 }
 
-renderStart();
+function renderLeaderboard(key, isPublic){
+  var sub=SUBJECTS[key]; applyTheme(sub);
+  var lb=aggregateLB(key);
+  var rows="";
+  if(lb.length===0){ rows='<div style="text-align:center;color:var(--muted);padding:28px;font-size:14px;">Chưa có lượt thi nào. Hãy là người đầu tiên!</div>'; }
+  else{
+    lb.slice(0,20).forEach(function(e,idx){
+      var medal=idx===0?"🥇":idx===1?"🥈":idx===2?"🥉":(idx+1)+".";
+      var isMe=(state.name && e.name.toLowerCase()===state.name.toLowerCase())?'border:2px solid var(--accent);background:var(--accent-soft);':'';
+      rows+='<div class="lb-row" style="'+isMe+'">'+
+        '<div style="display:flex;align-items:center;gap:10px;min-width:0;"><span style="font-weight:700;width:28px;text-align:center;flex-shrink:0;font-size:15px;">'+medal+'</span>'+
+        '<div style="min-width:0;"><div style="font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px;">'+e.name+'</div>'+
+        '<div style="font-size:11px;color:var(--muted);">Thi '+e.attempts+' lần · gần nhất '+e.date+'</div></div></div>'+
+        '<div style="text-align:right;flex-shrink:0;"><div style="font-weight:700;color:var(--accent);font-size:15px;">'+e.score+'/'+e.total+'</div>'+
+        '<div style="font-size:11px;color:var(--muted);font-weight:600;">'+e.pct+'%</div></div></div>';
+    });
+  }
+  var backBtn = isPublic
+    ? '<button class="btn" id="backHome" style="flex:1;background:var(--accent);color:#fff;border:none;padding:12px;border-radius:14px;font-size:14px;font-weight:600;font-family:inherit;">← Về trang chào</button>'
+    : '<button class="btn" id="backMenu" style="flex:1;background:#fff;color:var(--muted);border:2px solid var(--border);padding:12px;border-radius:14px;font-size:14px;font-weight:600;font-family:inherit;">Về menu</button>';
+  main.innerHTML='<div class="card" style="padding:22px 18px;">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px;">'+
+      '<h2 style="font-size:18px;font-weight:700;margin:0;color:var(--accent);">🏆 BXH công khai</h2>'+
+      '<span style="font-size:12px;background:var(--accent-soft);color:var(--accent);padding:4px 12px;border-radius:999px;font-weight:600;">'+sub.short+'</span></div>'+
+    '<p style="font-size:12px;color:var(--muted);margin:0 0 4px;">'+sub.name+' · Top 20 (gộp theo từng người, lấy điểm cao nhất)</p>'+
+    '<p style="font-size:11px;color:var(--accent2);font-weight:600;margin:0 0 14px;">💡 Gợi ý: bấm vào chuối vàng để xem nó nhảy!</p>'+
+    rows+
+    '<div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;">'+
+      '<button class="btn" id="doQuiz" style="flex:1;background:var(--accent);color:#fff;border:none;padding:12px;border-radius:14px;font-size:14px;font-weight:600;font-family:inherit;">Làm bài này</button>'+
+      backBtn+'</div></div>';
+  document.getElementById("doQuiz").onclick=function(){ if(!state.name){ renderWelcome(); return; } startQuiz(key); };
+  var bh=document.getElementById("backHome"); if(bh) bh.onclick=function(){renderWelcome();};
+  var bm=document.getElementById("backMenu"); if(bm) bm.onclick=function(){renderMenu();};
+}
+
+renderWelcome();
 })();
 </script>
 </html>
