@@ -1,373 +1,203 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kiệt Dev AI - v6 Ultimate System</title>
-    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <style>
-        :root {
-            --bg: #000000; --card: #121212; --primary: #8b5cf6; --secondary: #ec4899;
-            --accent: #10b981; --text: #ffffff; --border: #222;
-        }
-        /* Chế độ sáng (Light Mode) */
-        body.light-mode {
-            --bg: #f0f2f5; --card: #ffffff; --text: #1a1a1a; --border: #ddd;
-        }
+<html style="margin:0;padding:0;">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+(function(){
+  var s=document.createElement('style');
+  s.textContent=':root{--bg:#faf9f4;--card:#ffffff;--text:#0f172a;--muted:#64748b;--accent:#297a2e;--accent-soft:rgba(41,122,46,.14);--accent2:#d97706;--accent2-soft:rgba(217,119,6,.14);--border:rgba(15,23,42,.08);--wrong:#dc2626;--wrong-soft:rgba(220,38,38,.1);}body{font-family:"Fredoka",sans-serif;background:var(--bg);color:var(--text);}*{box-sizing:border-box;}.opt{transition:border-color .15s,background .15s;cursor:pointer;border:2px solid var(--border);background:#fff;}.opt:hover:not(.locked){border-color:var(--accent);background:var(--accent-soft);}.opt.correct{border-color:var(--accent);background:var(--accent-soft);}.opt.wrong{border-color:var(--wrong);background:var(--wrong-soft);}.opt.locked{cursor:default;}.opt.dim{opacity:.45;}.badge{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:10px;font-weight:600;flex-shrink:0;}.btn{transition:all .15s ease;cursor:pointer;user-select:none;}.btn:active{transform:scale(.97);}.progress-fill{transition:width .4s ease;}.qnav{width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:#fff;transition:all .15s;}.qnav:hover{border-color:var(--accent);}.qnav.done-ok{background:var(--accent);color:#fff;border-color:var(--accent);}.qnav.done-no{background:var(--wrong);color:#fff;border-color:var(--wrong);}.qnav.current{border-color:var(--accent2);box-shadow:0 0 0 2px var(--accent2-soft);}';
+  document.head.appendChild(s);
+})();
+</script>
+<div style="background-color:transparent;box-sizing:border-box;padding:20px 12px;">
+  <div id="app" style="max-width:680px;margin:0 auto;"></div>
+</div>
+<script>
+(function(){
+var Q=[
+{q:"Theo tiêu chuẩn TCVN 7285:2003, khổ giấy A4 có kích thước là bao nhiêu?",o:["841 x 1189 mm.","594 x 841 mm.","297 x 420 mm.","210 x 297 mm."],a:3},
+{q:"Loại nét vẽ nào sau đây được sử dụng để vẽ đường khung bản vẽ và đường khung tên?",o:["Nét liền mảnh.","Nét liền đậm.","Nét đứt mảnh.","Nét gạch chấm mảnh."],a:1},
+{q:"Tỉ lệ 1:2 ghi trên bản vẽ kỹ thuật thể hiện loại tỉ lệ nào?",o:["Tỉ lệ nguyên hình.","Tỉ lệ phóng to.","Tỉ lệ thu nhỏ.","Tỉ lệ tự do."],a:2},
+{q:"Trong phương pháp chiếu vuông góc, hướng chiếu từ trước vào mặt phẳng chiếu đứng cho ta hình chiếu nào?",o:["Hình chiếu đứng.","Hình chiếu bằng.","Hình chiếu cạnh.","Hình chiếu phối cảnh."],a:0},
+{q:"Trên bản vẽ kỹ thuật, hình chiếu bằng được bố trí ở vị trí nào so với hình chiếu đứng?",o:["Ở bên trái hình chiếu đứng.","Ở bên phải hình chiếu đứng.","Ở phía dưới hình chiếu đứng.","Ở phía trên hình chiếu đứng."],a:2},
+{q:"Hình chiếu vuông góc của hình hộp chữ nhật theo hướng chiếu từ trước là hình gì?",o:["Hình tam giác.","Hình tròn.","Hình chữ nhật.","Hình thoi."],a:2},
+{q:"Khối tròn xoay nào được tạo thành khi quay một hình tam giác vuông quanh một cạnh góc vuông cố định?",o:["Hình trụ.","Hình nón.","Hình cầu.","Hình hộp."],a:1},
+{q:"Hướng chiếu từ trái sang phải thu được hình chiếu nào sau đây?",o:["Hình chiếu đứng.","Hình chiếu bằng.","Hình chiếu cạnh.","Hình chiếu từ sau."],a:2},
+{q:"Hình chiếu vuông góc của hình cầu trên mọi mặt phẳng chiếu đều có dạng hình gì?",o:["Hình chữ nhật.","Hình tròn.","Hình tam giác.","Hình vuông."],a:1},
+{q:"Phương pháp chiếu vuông góc sử dụng các tia chiếu có đặc điểm gì đối với mặt phẳng chiếu?",o:["Song song với mặt phẳng chiếu.","Song song với nhau và vuông góc với mặt phẳng chiếu.","Đồng quy tại một điểm trong không gian.","Xiên góc với mặt phẳng chiếu."],a:1},
+{q:"Bản vẽ chi tiết gồm bao nhiêu nội dung chính?",o:["3 nội dung.","4 nội dung.","5 nội dung.","6 nội dung."],a:1},
+{q:"Nội dung nào sau đây KHÔNG có trên bản vẽ chi tiết?",o:["Khung tên.","Hình biểu diễn.","Bảng kê.","Yêu cầu kỹ thuật."],a:2},
+{q:"Khung tên của bản vẽ chi tiết thường được đặt ở vị trí nào?",o:["Góc trên bên trái bản vẽ.","Góc trên bên phải bản vẽ.","Góc dưới bên trái bản vẽ.","Góc dưới bên phải bản vẽ."],a:3},
+{q:"Nội dung của khung tên bao gồm?",o:["Tên gọi, vật liệu và tỉ lệ của chi tiết.","Gia công và xử lý bề mặt chi tiết.","Số lượng và tỉ lệ vẽ chi tiết.","Danh mục các chi tiết trong bộ sản phẩm."],a:0},
+{q:"Bản vẽ lắp được sử dụng chính vào mục đích gì trong kỹ thuật?",o:["Dùng để chế tạo một chi tiết máy duy nhất.","Dùng để lắp ráp, kiểm tra và vận hành sản phẩm gồm nhiều chi tiết.","Dùng để thi công xây dựng công trình nhà ở.","Dùng để tính toán giá thành nguyên vật liệu."],a:1},
+{q:"Nội dung nào sau đây có trên bản vẽ lắp nhưng KHÔNG xuất hiện trên bản vẽ chi tiết?",o:["Khung tên.","Bảng kê.","Kích thước.","Hình biểu diễn."],a:1},
+{q:"Phát biểu nào sau đây ĐÚNG về quy tắc ghi kích thước trên bản vẽ kỹ thuật?",o:["Đơn vị đo kích thước độ dài ghi trên bản vẽ mặc định là cm.","Chữ số kích thước được ghi phía dưới đường kích thước.","Đường dóng kích thước được vẽ bằng nét liền đậm.","Đơn vị đo độ dài mặc định là milimét (mm) và không cần ghi đơn vị sau chữ số kích thước."],a:3},
+{q:"Khi vẽ một chi tiết có chiều dài thực tế 100 mm lên giấy vẽ, chiều dài nét vẽ đo được là 200 mm, nhưng số ghi kích thước trên bản vẽ vẫn ghi 100 mm. Bản vẽ đó đang sử dụng tỉ lệ nào?",o:["Tỉ lệ 1:1.","Tỉ lệ 2:1.","Tỉ lệ 1:2.","Tỉ lệ 5:1."],a:1},
+{q:"Tại sao khi biểu diễn hình chiếu vuông góc của các khối đa diện hoặc khối tròn xoay đơn giản, người ta thường chỉ cần dùng 2 hình chiếu?",o:["Vì hình chiếu thứ 3 trùng hoàn toàn với hình chiếu thứ 1.","Vì 2 hình chiếu đã đủ để xác định rõ hình dạng và kích thước ba chiều của vật thể.","Vì quy định tiêu chuẩn không cho phép vẽ 3 hình chiếu.","Vì để tiết kiệm diện tích trang giấy vẽ."],a:1},
+{q:"Hình chiếu đứng của một vật thể thể hiện những kích thước chiều nào của vật thể đó?",o:["Chiều dài và chiều rộng.","Chiều dài và chiều cao.","Chiều rộng và chiều cao.","Chỉ thể hiện chiều cao."],a:1},
+{q:"Cho một hình lăng trụ đứng đáy là tam giác đều đặt sao cho đáy song song với mặt phẳng chiếu bằng. Hình chiếu đứng của lăng trụ đó có dạng hình gì?",o:["Hình tam giác đều.","Hình chữ nhật.","Hình tròn.","Hình ngũ giác."],a:1},
+{q:"Hình chiếu cạnh của một hình nón đặt đứng (đáy song song với mặt phẳng chiếu bằng) có dạng hình gì?",o:["Hình tròn.","Hình chữ nhật.","Hình tam giác cân.","Hình elip."],a:2},
+{q:"Điểm khác biệt căn bản giữa nét liền đậm và nét đứt mảnh khi biểu diễn vật thể trên bản vẽ là gì?",o:["Nét liền đậm vẽ đường kích thước, nét đứt mảnh vẽ đường trục.","Nét liền đậm vẽ đường bao thấy, nét đứt mảnh vẽ đường bao khuất.","Nét liền đậm vẽ đường tâm, nét đứt mảnh vẽ khung bản vẽ.","Nét liền đậm vẽ khung tên, nét đứt mảnh vẽ đường dóng."],a:1},
+{q:"Trình tự đọc bản vẽ chi tiết đúng quy chuẩn kỹ thuật là trình tự nào sau đây?",o:["1. Khung tên -> 2. Kích thước -> 3. Hình biểu diễn -> 4. Yêu cầu kỹ thuật","1. Khung tên -> 2. Hình biểu diễn -> 3. Kích thước -> 4. Yêu cầu kỹ thuật","1. Hình biểu diễn -> 2. Khung tên -> 3. Yêu cầu kỹ thuật -> 4. Kích thước","1. Yêu cầu kỹ thuật -> 2. Khung tên -> 3. Hình biểu diễn -> 4. Kích thước"],a:1},
+{q:"Khi đọc bản vẽ chi tiết Gối đỡ, thông số chỉ dẫn 'Mạ kẽm' hoặc 'Làm tù cạnh' thuộc nội dung nào của bản vẽ?",o:["Khung tên.","Hình biểu diễn.","Kích thước.","Yêu cầu kỹ thuật."],a:3},
+{q:"Nội dung \"Yêu cầu kỹ thuật\" trên bản vẽ chi tiết cung cấp những chỉ dẫn quan trọng nào cho quá trình chế tạo?",o:["Tên gọi chi tiết, vật liệu chế tạo và tỉ lệ bản vẽ.","Các chỉ dẫn về phương pháp gia công và xử lý bề mặt chi tiết.","Danh mục tên gọi và số lượng các chi tiết cần lắp ráp.","Kích thước tổng thể chiều dài, chiều rộng và chiều cao của chi tiết."],a:1},
+{q:"Các kích thước ghi trên bản vẽ lắp thường bao gồm những nhóm kích thước nào?",o:["Kích thước chế tạo chi tiết của toàn bộ các chi tiết nhỏ.","Kích thước chung (chiều dài, rộng, cao của toàn bộ sản phẩm) và kích thước lắp ráp giữa các chi tiết.","Chỉ gồm kích thước chiều cao khung tên và bảng kê.","Chỉ gồm kích thước đường kính các bu lông và lỗ khoan."],a:1},
+{q:"So sánh giữa bản vẽ chi tiết và bản vẽ lắp, điểm khác nhau cơ bản về mục đích sử dụng là gì?",o:["Bản vẽ chi tiết dùng để chế tạo, kiểm tra chi tiết; bản vẽ lắp dùng để lắp ráp, kiểm tra các chi tiết thành sản phẩm.","Bản vẽ chi tiết dùng trong thi công xây dựng; bản vẽ lắp dùng trong ngành dệt may.","Bản vẽ chi tiết bắt buộc vẽ bằng tay; bản vẽ lắp bắt buộc vẽ trên phần mềm vi tính.","Bản vẽ chi tiết có bảng kê; bản vẽ lắp có yêu cầu kỹ thuật."],a:0},
+{q:"Theo tiêu chuẩn TCVN 7285:2003, khổ giấy A3 có kích thước tiêu chuẩn là bao nhiêu?",o:["210 x 297 mm.","297 x 420 mm.","420 x 594 mm.","594 x 841 mm."],a:1},
+{q:"Để vẽ đường dóng kích thước và đường kích thước trên bản vẽ kỹ thuật, ta sử dụng nét vẽ nào?",o:["Nét liền đậm.","Nét liền mảnh.","Nét đứt mảnh.","Nét gạch chấm mảnh."],a:1},
+{q:"Khi biểu diễn một chi tiết siêu nhỏ trên bản vẽ, người ta dùng tỉ lệ 5:1. Tỉ lệ này thuộc loại tỉ lệ nào?",o:["Tỉ lệ thu nhỏ.","Tỉ lệ nguyên hình.","Tỉ lệ phóng to.","Tỉ lệ tự do."],a:2},
+{q:"Trên bản vẽ kỹ thuật tiêu chuẩn, hình chiếu cạnh được đặt ở vị trí nào so với hình chiếu đứng?",o:["Ở phía dưới hình chiếu đứng.","Ở phía trên hình chiếu đứng.","Ở bên phải hình chiếu đứng.","Ở bên trái hình chiếu đứng."],a:2},
+{q:"Hình chiếu bằng của một hình lăng trụ đứng tam giác đều (đáy song song với mặt phẳng chiếu bằng) có dạng hình gì?",o:["Hình chữ nhật.","Hình tam giác đều.","Hình tròn.","Hình thoi."],a:1},
+{q:"Khi quay một hình chữ nhật một vòng quanh một cạnh cố định, khối tròn xoay thu được là khối nào?",o:["Hình nón.","Hình cầu.","Hình trụ.","Hình nón cụt."],a:2},
+{q:"Khi quay một hình bán nguyệt một vòng quanh đường kính cố định, khối tròn xoay thu được là khối nào?",o:["Hình trụ.","Hình cầu.","Hình nón.","Hình vành khăn."],a:1},
+{q:"Nội dung 'Hình biểu diễn' trên bản vẽ chi tiết cho người đọc biết thông tin gì?",o:["Vật liệu và tỉ lệ vẽ.","Hình dạng, cấu tạo của chi tiết.","Số lượng chi tiết cần làm.","Giá thành của chi tiết."],a:1},
+{q:"Hình chiếu đứng của hình cầu là?",o:["Hình chữ nhật.","Hình tam giác.","Hình vuông.","Hình tròn."],a:3},
+{q:"Hình chiếu đứng, hình chiếu bằng, hình chiếu cạnh của vật thể hình trụ sau lần lượt là?",o:["Hình chữ nhật, hình tròn, hình chữ nhật.","Tam giác vuông, hình chữ nhật, hình chữ nhật.","Hình tròn, hình chữ nhật, hình chữ nhật.","Hình chữ nhật, hình tròn, hình tròn."],a:0},
+{q:"Đường trục, đường tâm của hình tròn, đường phân giác trên bản vẽ kỹ thuật được vẽ bằng nét gì?",o:["Nét liền đậm.","Nét đứt mảnh.","Nét gạch chấm mảnh.","Nét liền mảnh."],a:2},
+{q:"Theo tiêu chuẩn TCVN 7285:2003, khổ giấy A1 có kích thước là bao nhiêu?",o:["841 x 1189 mm.","594 x 841 mm.","297 x 420 mm.","210 x 297 mm."],a:1}
+];
+var letters=["A","B","C","D"];
+var app=document.getElementById("app");
+var state={idx:0,score:0,answers:[]};
+for(var i=0;i<Q.length;i++) state.answers.push(null);
 
-        * { box-sizing: border-box; transition: 0.3s ease; }
-        body { font-family: 'Lexend', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 90px; overflow-x: hidden; }
+function navHtml(){
+  var h='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:16px;">';
+  for(var i=0;i<Q.length;i++){
+    var cls="qnav";
+    if(state.answers[i]!==null) cls+= state.answers[i].ok?" done-ok":" done-no";
+    if(i===state.idx) cls+=" current";
+    h+='<span class="'+cls+'" data-jump="'+i+'">'+(i+1)+'</span>';
+  }
+  h+='</div>';
+  return h;
+}
 
-        /* Popup Thông báo lỗi */
-        #error-alert { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 5000; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .alert-box { background: var(--card); border: 2px solid var(--secondary); border-radius: 25px; padding: 30px; text-align: center; max-width: 450px; box-shadow: 0 0 50px rgba(236, 72, 153, 0.3); animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+function renderStart(){
+  state.idx=0;state.score=0;
+  for(var i=0;i<Q.length;i++) state.answers[i]=null;
+  app.innerHTML='<div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:36px 28px;text-align:center;box-shadow:0 8px 30px rgba(15,23,42,.06);">'+
+    '<div style="display:inline-block;background:var(--accent-soft);color:var(--accent);padding:6px 16px;border-radius:999px;font-size:13px;font-weight:600;margin-bottom:18px;">40 CÂU TRẮC NGHIỆM</div>'+
+    '<h1 style="font-size:28px;font-weight:700;margin:0 0 8px;line-height:1.25;">Quiz Ôn Tập<br>Công Nghệ 8 - Vẽ Kỹ Thuật</h1>'+
+    '<p style="color:var(--muted);font-size:14px;margin:0 0 6px;">Giữa học kỳ I · Năm học 2026 - 2027 · Từ bài 1 đến bài 4</p>'+
+    '<p style="color:var(--accent2);font-size:13px;margin:0 0 24px;font-weight:500;">Đề thực tế là môn Công Nghệ (vẽ kỹ thuật), không phải Vật lý</p>'+
+    '<div style="display:flex;gap:12px;justify-content:center;margin-bottom:28px;flex-wrap:wrap;">'+
+      '<div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px 18px;min-width:90px;"><div style="font-size:22px;font-weight:700;color:var(--accent);">40</div><div style="font-size:12px;color:var(--muted);">câu hỏi</div></div>'+
+      '<div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px 18px;min-width:90px;"><div style="font-size:22px;font-weight:700;color:var(--accent2);">4</div><div style="font-size:12px;color:var(--muted);">lựa chọn</div></div>'+
+      '<div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px 18px;min-width:90px;"><div style="font-size:22px;font-weight:700;color:#0f172a;">45</div><div style="font-size:12px;color:var(--muted);">phút (tham khảo)</div></div>'+
+    '</div>'+
+    '<button id="startBtn" class="btn" style="background:var(--accent);color:#fff;border:none;padding:14px 40px;border-radius:14px;font-size:16px;font-weight:600;font-family:inherit;box-shadow:0 4px 14px rgba(41,122,46,.3);">Bắt đầu làm bài</button>'+
+  '</div>';
+  document.getElementById("startBtn").onclick=function(){renderQuestion();};
+}
 
-        /* Pages */
-        .page { display: none; padding: 20px; animation: fadeIn 0.4s ease; }
-        .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+function renderQuestion(){
+  var i=state.idx, item=Q[i];
+  var pct=Math.round((i/Q.length)*100);
+  var answered=state.answers[i]!==null;
+  var optsHtml="";
+  for(var k=0;k<4;k++){
+    var extra="";
+    if(answered){
+      if(k===item.a) extra=" correct";
+      else if(k===state.answers[i].chosen) extra=" wrong";
+      else extra=" dim";
+    }
+    optsHtml+='<div class="opt'+extra+(answered?" locked":"")+'" data-i="'+k+'" style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:14px;margin-bottom:10px;">'+
+      '<span class="badge" style="background:var(--bg);border:1.5px solid var(--border);color:var(--muted);font-size:14px;">'+letters[k]+'</span>'+
+      '<span style="font-size:15px;line-height:1.5;padding-top:4px;">'+item.o[k]+'</span></div>';
+  }
+  var fbHtml="";
+  if(answered){
+    var ok=state.answers[i].ok;
+    fbHtml='<div style="margin-top:6px;margin-bottom:14px;padding:12px 16px;border-radius:12px;font-size:14px;font-weight:500;line-height:1.5;background:'+(ok?"var(--accent-soft)":"var(--wrong-soft)")+';color:'+(ok?"var(--accent)":"var(--wrong)")+';">'+
+      (ok?'<span style="font-weight:700;">Chính xác!</span> Đáp án đúng là '+letters[item.a]+'.':
+      '<span style="font-weight:700;">Chưa đúng.</span> Đáp án đúng là <b>'+letters[item.a]+'</b>: '+item.o[item.a])+'</div>';
+  }
+  var nextLabel=(i===Q.length-1)?"Xem kết quả":"Câu tiếp theo";
+  app.innerHTML='<div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px 20px;box-shadow:0 8px 30px rgba(15,23,42,.06);">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">'+
+      '<span style="font-size:13px;font-weight:600;color:var(--muted);">Câu '+(i+1)+' / '+Q.length+'</span>'+
+      '<span style="font-size:12px;font-weight:600;color:var(--accent);">Đã đúng: '+state.score+'</span>'+
+    '</div>'+
+    '<div style="height:8px;background:var(--bg);border-radius:999px;overflow:hidden;margin-bottom:20px;"><div class="progress-fill" style="height:100%;width:'+pct+'%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:999px;"></div></div>'+
+    '<h2 style="font-size:17px;font-weight:600;margin:0 0 18px;line-height:1.5;">'+item.q+'</h2>'+
+    '<div id="opts">'+optsHtml+'</div>'+
+    fbHtml+
+    '<div style="display:flex;gap:10px;margin-top:6px;">'+
+      (i>0?'<button id="prevBtn" class="btn" style="flex:1;background:var(--bg);color:var(--text);border:1.5px solid var(--border);padding:13px;border-radius:14px;font-size:15px;font-weight:600;font-family:inherit;">Câu trước</button>':'')+
+      '<button id="nextBtn" class="btn" style="flex:2;background:'+(answered?"var(--accent)":"#e2e8f0")+';color:'+(answered?"#fff":"#94a3b8")+';border:none;padding:13px;border-radius:14px;font-size:15px;font-weight:600;font-family:inherit;" '+(answered?"":"disabled")+'>'+nextLabel+'</button>'+
+    '</div>'+
+    navHtml()+
+  '</div>';
 
-        /* UI Elements */
-        .glass-card { background: var(--card); border-radius: 20px; padding: 25px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        input, textarea, select, button { width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text); outline: none; font-family: inherit; }
-        .btn-gradient { background: linear-gradient(90deg, var(--primary), var(--secondary)); border: none; font-weight: bold; cursor: pointer; color: white; }
-        ::placeholder { color: #888; font-style: italic; }
+  if(!answered){
+    var optEls=document.querySelectorAll(".opt");
+    optEls.forEach(function(el){
+      el.onclick=function(){
+        var chosen=parseInt(el.getAttribute("data-i"));
+        var correct=item.a;
+        var ok=(chosen===correct);
+        state.answers[i]={ok:ok,chosen:chosen};
+        if(ok) state.score++;
+        renderQuestion();
+      };
+    });
+  }
+  document.getElementById("nextBtn").onclick=function(){
+    if(i===Q.length-1){renderResult();}
+    else{state.idx++;renderQuestion();}
+  };
+  var pb=document.getElementById("prevBtn");
+  if(pb) pb.onclick=function(){state.idx--;renderQuestion();};
+  document.querySelectorAll(".qnav").forEach(function(el){
+    el.onclick=function(){state.idx=parseInt(el.getAttribute("data-jump"));renderQuestion();};
+  });
+}
 
-        /* Navbar 8 mục */
-        .nav-bar { position: fixed; bottom: 0; width: 100%; background: var(--card); display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid var(--border); z-index: 1000; overflow-x: auto; }
-        .nav-item { color: #666; cursor: pointer; font-size: 1rem; min-width: 45px; text-align: center; }
-        .nav-item.active { color: var(--primary); transform: translateY(-5px); }
+function renderResult(){
+  var sc=state.score, total=Q.length;
+  var pct=Math.round(sc/total*100);
+  var msg,color;
+  if(pct>=90){msg="Xuất sắc!";color="var(--accent)";}
+  else if(pct>=70){msg="Khá tốt!";color="var(--accent)";}
+  else if(pct>=50){msg="Cần ôn thêm!";color="var(--accent2)";}
+  else{msg="Cần cố gắng hơn!";color="var(--wrong)";}
+  var wrongList="";
+  var wrongCount=0;
+  state.answers.forEach(function(a,idx){
+    if(a && !a.ok){
+      wrongCount++;
+      var item=Q[idx];
+      wrongList+='<div style="padding:12px 14px;border:1px solid var(--border);border-radius:12px;margin-bottom:10px;background:var(--bg);">'+
+        '<div style="font-size:13px;font-weight:600;color:var(--wrong);margin-bottom:4px;">Câu '+(idx+1)+' · Bạn chọn '+letters[a.chosen]+'</div>'+
+        '<div style="font-size:14px;line-height:1.5;margin-bottom:6px;">'+item.q+'</div>'+
+        '<div style="font-size:13px;color:var(--accent);font-weight:500;">Đáp án đúng: '+letters[item.a]+'. '+item.o[item.a]+'</div></div>';
+    }
+  });
+  if(wrongCount===0) wrongList='<div style="text-align:center;color:var(--accent);font-weight:600;padding:20px;">Bạn đã làm đúng toàn bộ 40 câu!</div>';
+  var circle=2*Math.PI*52;
+  app.innerHTML='<div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px 20px;box-shadow:0 8px 30px rgba(15,23,42,.06);text-align:center;margin-bottom:16px;">'+
+    '<h2 style="font-size:22px;font-weight:700;margin:0 0 20px;">Kết quả của bạn</h2>'+
+    '<div style="position:relative;width:140px;height:140px;margin:0 auto 16px;">'+
+      '<svg width="140" height="140" viewBox="0 0 140 140">'+
+        '<circle cx="70" cy="70" r="52" fill="none" stroke="var(--bg)" stroke-width="12"/>'+
+        '<circle cx="70" cy="70" r="52" fill="none" stroke="'+color+'" stroke-width="12" stroke-linecap="round" stroke-dasharray="'+circle+'" stroke-dashoffset="'+(circle*(1-pct/100))+'" transform="rotate(-90 70 70)"/>'+
+      '</svg>'+
+      '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;">'+
+        '<div style="font-size:32px;font-weight:700;color:'+color+';">'+sc+'/'+total+'</div>'+
+        '<div style="font-size:13px;color:var(--muted);">'+pct+'%</div>'+
+      '</div></div>'+
+    '<div style="font-size:18px;font-weight:600;color:'+color+';margin-bottom:6px;">'+msg+'</div>'+
+    '<div style="font-size:14px;color:var(--muted);margin-bottom:20px;">Đúng '+sc+' câu · Sai '+(total-sc)+' câu</div>'+
+    '<button id="retryBtn" class="btn" style="background:var(--accent);color:#fff;border:none;padding:12px 32px;border-radius:14px;font-size:15px;font-weight:600;font-family:inherit;box-shadow:0 4px 14px rgba(41,122,46,.3);">Làm lại từ đầu</button>'+
+  '</div>'+
+  (wrongCount>0?'<div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:20px;box-shadow:0 8px 30px rgba(15,23,42,.06);">'+
+    '<h3 style="font-size:16px;font-weight:600;margin:0 0 14px;color:var(--wrong);">Những câu cần ôn lại ('+wrongCount+')</h3>'+
+    wrongList+'</div>':'');
+  document.getElementById("retryBtn").onclick=renderStart;
+}
 
-        /* Profile & Stats */
-        .avatar-lg { width: 120px; height: 120px; border-radius: 50%; border: 4px solid var(--primary); margin: 0 auto 15px; display: block; object-fit: cover; background: #333; }
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        .stat-box { background: var(--bg); padding: 15px; border-radius: 15px; text-align: center; border: 1px solid var(--border); }
-        
-        /* Quiz */
-        .quiz-opt { display: block; width: 100%; padding: 15px; background: rgba(139, 92, 246, 0.1); border: 2px solid var(--border); border-radius: 10px; margin: 10px 0; text-align: left; color: var(--text); cursor: pointer; }
-        .quiz-opt.selected { border-color: var(--primary); background: rgba(139, 92, 246, 0.2); }
-        #loading { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 4000; flex-direction: column; align-items: center; justify-content: center; }
-    </style>
-</head>
-<body>
-
-    <div id="error-alert">
-        <div class="alert-box">
-            <i class="fas fa-tools fa-3x" style="color: var(--secondary); margin-bottom: 20px;"></i>
-            <h3>THÔNG BÁO TỪ KIỆT DEV</h3>
-            <p style="line-height: 1.6; font-size: 0.95rem;">Nếu có bất cứ lỗi gì thì bạn hãy chụp màn hình lại sau đó tiến qua mục thứ 7 gửi ảnh kèm diễn tả lúc đấy như thế nào.</p>
-            <button class="btn-gradient" onclick="closeAlert()" style="margin-top: 15px;">TÔI ĐÃ HIỂU</button>
-        </div>
-    </div>
-
-    <div id="loading">
-        <i class="fas fa-atom fa-spin fa-4x" style="color: var(--primary);"></i>
-        <h2 style="margin-top: 20px;">KIỆT DEV AI ĐANG QUÉT ĐỀ...</h2>
-    </div>
-
-    <div id="page-1" class="page active">
-        <div class="glass-card" style="text-align: center; margin-top: 40px;">
-            <i class="fas fa-brain fa-4x" style="color: var(--primary);"></i>
-            <h1>KIỆT AI HUB v6</h1>
-            <p>Nền tảng hỗ trợ học tập lớp 7 tích hợp AI Gemini 1.5 Flash.</p>
-            <button class="btn-gradient" onclick="nav(2)">VÀO HỆ THỐNG</button>
-        </div>
-    </div>
-
-    <div id="page-2" class="page">
-        <div id="auth-choice" class="glass-card" style="text-align: center;">
-            <h2>Bảo Mật 2 Lớp</h2>
-            <button class="btn-gradient" onclick="showAuth('reg')">TẠO TÀI KHOẢN</button>
-            <button style="background:var(--border)" onclick="showAuth('login')">ĐĂNG NHẬP</button>
-        </div>
-
-        <div id="form-reg" class="glass-card" style="display:none">
-            <h3>Đăng Ký Thành Viên</h3>
-            <input type="text" id="r-name" placeholder="Nhập bạn muốn viết vào đây... (Tên đăng nhập)">
-            <input type="password" id="r-p1" placeholder="Nhập bạn muốn viết vào đây... (Mật khẩu lớp 1)">
-            <input type="password" id="r-p2" placeholder="Nhập bạn muốn viết vào đây... (Mật khẩu xác thực - Phải khác)">
-            <button class="btn-gradient" onclick="handleRegister()">XÁC NHẬN ĐĂNG KÝ</button>
-            <button onclick="showAuth('choice')" style="background:none; border:none">← Quay lại</button>
-        </div>
-
-        <div id="form-login" class="glass-card" style="display:none">
-            <h3>Đăng Nhập Đối Chiếu</h3>
-            <input type="text" id="l-name" placeholder="Nhập bạn muốn viết vào đây... (Tên)">
-            <input type="password" id="l-p1" placeholder="Mật khẩu lớp 1...">
-            <input type="password" id="l-p2" placeholder="Mật khẩu xác thực...">
-            <button class="btn-gradient" onclick="handleLogin()">VÀO TÀI KHOẢN</button>
-            <button onclick="showAuth('choice')" style="background:none; border:none">← Quay lại</button>
-        </div>
-
-        <div id="user-info-card" class="glass-card" style="display:none; text-align: center;">
-            <i class="fas fa-check-circle fa-3x" style="color: var(--accent);"></i>
-            <h2 id="welcome-name"></h2>
-            <button class="btn-gradient" onclick="nav(3)">ĐI ĐẾN BÀI TEST AI</button>
-        </div>
-    </div>
-
-    <div id="page-3" class="page">
-        <div id="sub-list">
-            <h2>Chọn Môn Ôn Tập</h2>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
-                <button onclick="prepTest('Toán')">TOÁN</button>
-                <button onclick="prepTest('Anh')">ANH VĂN</button>
-                <button onclick="prepTest('KHTN')">KHTN</button>
-                <button onclick="prepTest('Văn')">NGỮ VĂN</button>
-            </div>
-        </div>
-        <div id="test-prep" style="display:none">
-            <h3 id="active-sub"></h3>
-            <div class="glass-card">
-                <p>Chụp ảnh đề cương của bạn:</p>
-                <input type="file" id="exam-imgs" multiple accept="image/*">
-                <button class="btn-gradient" onclick="runAI()">BẮT ĐẦU PHÂN TÍCH</button>
-                <button onclick="location.reload()" style="background:none">Hủy</button>
-            </div>
-        </div>
-        <div id="quiz-zone" style="display:none">
-            <div id="ai-err" class="glass-card" style="display:none; color:var(--secondary); border-color:var(--secondary)"></div>
-            <div id="question-list"></div>
-            <button class="btn-gradient" onclick="submitTest()">NỘP BÀI</button>
-        </div>
-    </div>
-
-    <div id="page-4" class="page">
-        <h2>Bảng Vàng Danh Dự</h2>
-        <div class="glass-card" id="rank-content"></div>
-    </div>
-
-    <div id="page-5" class="page">
-        <div class="glass-card" style="text-align: center;">
-            <h2>Quản Lý Tài Khoản</h2>
-            <img src="" id="prof-avt" class="avatar-lg">
-            <h3 id="prof-nick">Người dùng mới</h3>
-            
-            <div style="display:flex; gap:10px; margin-bottom: 20px;">
-                <button onclick="document.getElementById('avt-up').click()" style="font-size: 0.8rem;"><i class="fas fa-camera"></i> Đổi ảnh</button>
-                <input type="file" id="avt-up" hidden accept="image/*" onchange="changeAvt(this)">
-                <button onclick="changeNick()" style="font-size: 0.8rem;"><i class="fas fa-edit"></i> Đổi tên</button>
-            </div>
-
-            <div class="stat-grid">
-                <div class="stat-box"><small>Điểm cao nhất</small><br><b id="st-score">0</b></div>
-                <div class="stat-box"><small>Bài đã làm</small><br><b id="st-count">0</b></div>
-            </div>
-
-            <hr style="border: 0.5px solid var(--border); margin: 20px 0;">
-
-            <button onclick="toggleTheme()" id="theme-btn"><i class="fas fa-moon"></i> Chế độ Tối/Sáng</button>
-            <button onclick="location.reload()" style="background: var(--secondary)"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
-        </div>
-    </div>
-
-    <div id="page-6" class="page">
-        <h2>Tiện Ích Học Tập</h2>
-        <div class="glass-card">Tính năng Sổ tay ghi chú đang được Kiệt phát triển...</div>
-    </div>
-
-    <div id="page-7" class="page">
-        <div class="glass-card">
-            <h2 style="color:var(--secondary)">Báo Lỗi Hệ Thống</h2>
-            <p>Vui lòng chụp màn hình nếu gặp lỗi Kiệt nhé!</p>
-            <input type="file" id="err-file" accept="image/*">
-            <textarea id="err-text" rows="5" placeholder="Nhập bạn muốn viết vào đây... (Diễn tả lúc gặp lỗi)"></textarea>
-            <button class="btn-gradient" onclick="sendBug()">GỬI BÁO CÁO</button>
-        </div>
-    </div>
-
-    <div id="page-8" class="page">
-        <div class="glass-card">
-            <h2>Hệ Thống Quản Trị</h2>
-            <input type="password" id="adm-pass" placeholder="Mật khẩu Admin Kiệt (200113)...">
-            <button class="btn-gradient" onclick="authAdmin()">TRUY CẬP</button>
-            <div id="adm-panel" style="display:none; margin-top: 20px;">
-                <h3>Lịch sử Báo lỗi/Góp ý:</h3>
-                <div id="bug-list"></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="nav-bar">
-        <div class="nav-item active" onclick="nav(1)"><i class="fas fa-home"></i></div>
-        <div class="nav-item" onclick="nav(2)"><i class="fas fa-user-lock"></i></div>
-        <div class="nav-item" onclick="nav(3)"><i class="fas fa-brain"></i></div>
-        <div class="nav-item" onclick="nav(4)"><i class="fas fa-medal"></i></div>
-        <div class="nav-item" onclick="nav(5)"><i class="fas fa-user-cog"></i></div>
-        <div class="nav-item" onclick="nav(6)"><i class="fas fa-book"></i></div>
-        <div class="nav-item" onclick="nav(7)"><i class="fas fa-bug"></i></div>
-        <div class="nav-item" onclick="nav(8)"><i class="fas fa-user-shield"></i></div>
-    </div>
-
-    <script type="module">
-        import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
-
-        // --- CẤU HÌNH API KEY KIỆT DEV ---
-                const PART_1 = 'AIzaSyDSbSiEoTzz';
-        const PART_2 = '-njXisLAgQemEviSfq7TVLg';
-        const API_KEY = PART_1 + PART_2;
-
-
-        let db = JSON.parse(localStorage.getItem('kiet_v6_db')) || { users: [], bugs: [], settings: { theme: 'dark' } };
-        let curU = null;
-        let activeSub = '';
-        let aiResult = null;
-        let userAns = {};
-
-        // Khởi tạo theme
-        if(db.settings.theme === 'light') document.body.classList.add('light-mode');
-
-        // Nav & Popup
-        window.closeAlert = () => document.getElementById('error-alert').style.display = 'none';
-        window.nav = (num) => {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById('page-' + num).classList.add('active');
-            document.querySelectorAll('.nav-item').forEach((it, i) => {
-                it.classList.remove('active'); if(i === num-1) it.classList.add('active');
-            });
-            if(num === 5) renderProfile();
-        };
-
-        // Auth 2 Lớp
-        window.showAuth = (type) => {
-            document.getElementById('auth-choice').style.display = type === 'choice' ? 'block' : 'none';
-            document.getElementById('form-reg').style.display = type === 'reg' ? 'block' : 'none';
-            document.getElementById('form-login').style.display = type === 'login' ? 'block' : 'none';
-        };
-
-        window.handleRegister = () => {
-            const n = document.getElementById('r-name').value;
-            const p1 = document.getElementById('r-p1').value;
-            const p2 = document.getElementById('r-p2').value;
-            if(!n || !p1 || !p2) return alert("Điền đủ thông tin Kiệt ơi!");
-            if(p1 === p2) return alert("2 mật khẩu phải khác nhau để bảo mật!");
-            db.users.push({ name: n, p1, p2, score: 0, count: 0, nick: n, avt: '' });
-            save(); alert("Đăng ký xong! Hãy đăng nhập."); showAuth('login');
-        };
-
-        window.handleLogin = () => {
-            const n = document.getElementById('l-name').value;
-            const p1 = document.getElementById('l-p1').value;
-            const p2 = document.getElementById('l-p2').value;
-            const u = db.users.find(x => x.name === n && x.p1 === p1 && x.p2 === p2);
-            if(u) {
-                curU = u;
-                document.getElementById('form-login').style.display = 'none';
-                document.getElementById('user-info-card').style.display = 'block';
-                document.getElementById('welcome-name').innerText = "Chào Kiệt: " + n;
-            } else alert("Sai thông tin đăng nhập!");
-        };
-
-        // Quản lý tài khoản (Section 5)
-        window.renderProfile = () => {
-            if(!curU) return alert("Vui lòng đăng nhập trước!");
-            document.getElementById('prof-avt').src = curU.avt || 'https://www.w3schools.com/howto/img_avatar.png';
-            document.getElementById('prof-nick').innerText = curU.nick;
-            document.getElementById('st-score').innerText = curU.score + "%";
-            document.getElementById('st-count').innerText = curU.count;
-        };
-
-        window.changeAvt = (input) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                curU.avt = e.target.result;
-                document.getElementById('prof-avt').src = e.target.result;
-                save();
-            };
-            reader.readAsDataURL(input.files[0]);
-        };
-
-        window.changeNick = () => {
-            const n = prompt("Nhập biệt danh bạn muốn viết vào đây...", curU.nick);
-            if(n) { curU.nick = n; document.getElementById('prof-nick').innerText = n; save(); }
-        };
-
-        window.toggleTheme = () => {
-            const isLight = document.body.classList.toggle('light-mode');
-            db.settings.theme = isLight ? 'light' : 'dark';
-            save();
-        };
-
-        // AI Logic
-        window.prepTest = (s) => {
-            if(!curU) return alert("Đăng nhập đã Kiệt ơi!");
-            activeSub = s;
-            document.getElementById('active-sub').innerText = "Môn: " + s;
-            document.getElementById('sub-list').style.display = 'none';
-            document.getElementById('test-prep').style.display = 'block';
-        };
-
-        window.runAI = async () => {
-            const files = document.getElementById('exam-imgs').files;
-            if(!files.length) return alert("Chưa có ảnh đề cương!");
-            document.getElementById('loading').style.display = 'flex';
-            
-            try {
-                const genAI = new GoogleGenerativeAI(API_KEY);
-                const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-                const imgs = await Promise.all([...files].map(f => new Promise(res => {
-                    const r = new FileReader();
-                    r.onloadend = () => res({ inlineData: { data: r.result.split(',')[1], mimeType: f.type }});
-                    r.readAsDataURL(f);
-                })));
-
-                const prompt = `Bạn là AI hỗ trợ Kiệt. Đọc đề cương môn ${activeSub} lớp 7. 1. Liệt kê lỗi sai nếu có. 2. Tạo JSON: {"errors":[], "questions":[{"q":"","a":[],"c":0}]}`;
-                const res = await model.generateContent([prompt, ...imgs]);
-                aiResult = JSON.parse(res.response.text().match(/\{.*\}/s)[0]);
-
-                document.getElementById('test-prep').style.display = 'none';
-                document.getElementById('quiz-zone').style.display = 'block';
-                
-                if(aiResult.errors.length) {
-                    const errB = document.getElementById('ai-err');
-                    errB.style.display = 'block';
-                    errB.innerHTML = "⚠️ Lỗi đề cương: " + aiResult.errors.join(", ");
-                }
-
-                document.getElementById('question-list').innerHTML = aiResult.questions.map((q, i) => `
-                    <div class="glass-card">
-                        <p><b>Câu ${i+1}:</b> ${q.q}</p>
-                        ${q.a.map((o, j) => `<button class="quiz-opt" id="q${i}o${j}" onclick="sel(${i},${j})">${o}</button>`).join('')}
-                    </div>
-                `).join('');
-            } catch (e) { alert("Lỗi kết nối AI Gemini!"); }
-            finally { document.getElementById('loading').style.display = 'none'; }
-        };
-
-        window.sel = (q, o) => {
-            userAns[q] = o;
-            document.querySelectorAll(`[id^="q${q}o"]`).forEach(b => b.classList.remove('selected'));
-            document.getElementById(`q${q}o${o}`).classList.add('selected');
-        };
-
-        window.submitTest = () => {
-            let ok = 0;
-            aiResult.questions.forEach((q, i) => { if(userAns[i] === q.c) ok++; });
-            const s = Math.round((ok/aiResult.questions.length)*100);
-            curU.score = Math.max(curU.score, s);
-            curU.count++; save();
-            alert("Bạn đạt " + s + " điểm!"); location.reload();
-        };
-
-        // Bug & Admin
-        window.sendBug = () => {
-            const t = document.getElementById('err-text').value;
-            if(!t) return alert("Mô tả lỗi đã Kiệt ơi!");
-            db.bugs.push({ user: curU?.nick || 'Ẩn danh', text: t, date: new Date().toLocaleString() });
-            save(); alert("Đã gửi! Admin Kiệt sẽ xử lý.");
-            document.getElementById('err-text').value = "";
-        };
-
-        window.authAdmin = () => {
-            if(document.getElementById('adm-pass').value === "200113") {
-                document.getElementById('adm-panel').style.display = 'block';
-                document.getElementById('bug-list').innerHTML = db.bugs.map(b => `<div class="glass-card"><small>${b.date} - ${b.user}</small><br>${b.text}</div>`).reverse().join('');
-            } else alert("Sai pass Admin!");
-        };
-
-        function save() { localStorage.setItem('kiet_v6_db', JSON.stringify(db)); }
-    </script>
-</body>
+renderStart();
+})();
+</script>
 </html>
