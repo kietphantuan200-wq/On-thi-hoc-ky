@@ -1,376 +1,850 @@
-<html style="margin:0;padding:0;">
+```html
+<!DOCTYPE html>
+<html lang="vi" style="margin:0;padding:0;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Luyện Thi Lớp 8 - Giữa Kỳ I</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
 (function(){
   var s=document.createElement('style');
-  s.textContent='*{box-sizing:border-box;}body{font-family:"Fredoka",sans-serif;margin:0;}#app{position:relative;min-height:100%;transition:background .4s ease;overflow:hidden;}.opt{transition:border-color .15s,background .15s;cursor:pointer;border:2px solid var(--border);background:#fff;}.opt:hover:not(.locked){border-color:var(--accent);background:var(--accent-soft);}.opt.correct{border-color:var(--accent);background:var(--accent-soft);}.opt.wrong{border-color:var(--wrong);background:var(--wrong-soft);}.opt.locked{cursor:default;}.opt.dim{opacity:.45;}.badge{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:10px;font-weight:600;flex-shrink:0;}.btn{transition:all .15s ease;cursor:pointer;user-select:none;}.btn:active{transform:scale(.97);}.progress-fill{transition:width .4s ease;}.card{background:var(--card);border:1px solid var(--border);border-radius:20px;box-shadow:0 8px 30px rgba(15,23,42,.06);position:relative;z-index:2;}.subject-card{cursor:pointer;transition:transform .2s,box-shadow .2s;}.subject-card:hover{transform:translateY(-4px);box-shadow:0 14px 36px rgba(15,23,42,.12);}input[type=text]{font-family:inherit;}.lb-row{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-radius:12px;margin-bottom:6px;background:var(--bg);border:1px solid var(--border);}#banana{position:absolute;z-index:50;cursor:pointer;width:70px;height:80px;will-change:transform;}';
+  s.textContent='*{box-sizing:border-box;}body{font-family:"Fredoka",sans-serif;margin:0;}#app{position:relative;min-height:100vh;background-size:cover;background-position:center;background-repeat:no-repeat;transition:background .5s ease;}.overlay{background:rgba(255,255,255,.78);backdrop-filter:blur(6px);}.opt{transition:border-color .15s,background .15s;cursor:pointer;border:2px solid var(--border);background:#fff;}.opt:hover:not(.locked){border-color:var(--accent);background:var(--accent-soft);}.opt.correct{border-color:var(--accent);background:var(--accent-soft);}.opt.wrong{border-color:var(--wrong);background:var(--wrong-soft);}.opt.locked{cursor:default;}.opt.dim{opacity:.45;}.badge{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:9px;font-weight:600;flex-shrink:0;}.btn{transition:all .15s ease;cursor:pointer;user-select:none;}.btn:active{transform:scale(.97);}.progress-fill{transition:width .4s ease;}.card{background:var(--card);border:1px solid var(--border);border-radius:20px;box-shadow:0 8px 30px rgba(15,23,42,.1);position:relative;z-index:2;}.subject-card{cursor:pointer;transition:transform .2s,box-shadow .2s;}.subject-card:hover{transform:translateY(-3px);box-shadow:0 14px 36px rgba(15,23,42,.15);}input{font-family:inherit;}.lb-row{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border-radius:12px;margin-bottom:6px;background:rgba(255,255,255,.7);border:1px solid var(--border);}.av{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2.5px solid var(--accent);flex-shrink:0;background:#e2e8f0;}.av-sm{width:30px;height:30px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);flex-shrink:0;background:#e2e8f0;}.tab{cursor:pointer;padding:10px 18px;font-weight:600;font-size:14px;border-bottom:3px solid transparent;color:var(--muted);}.tab.active{color:var(--accent);border-bottom-color:var(--accent);}';
   document.head.appendChild(s);
 })();
 </script>
+</head>
+<body>
 <div id="app" style="padding:20px 12px;">
   <div id="main" style="max-width:680px;margin:0 auto;position:relative;z-index:2;"></div>
-  <div id="banana"></div>
+  <div id="userModal" style="position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(7,7,15,.78);backdrop-filter:blur(8px);"></div>
 </div>
+
 <script>
 (function(){
-/* ============ AUDIO ============ */
+/* ===== AUDIO ===== */
 var actx=null;
-function ensureAudio(){ try{ if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==='suspended') actx.resume(); }catch(e){} }
-function tone(freq,dur,type,vol){ try{ ensureAudio(); var o=actx.createOscillator(),g=actx.createGain(); o.connect(g);g.connect(actx.destination); o.type=type||'sine'; o.frequency.value=freq; g.gain.setValueAtTime(vol||0.12,actx.currentTime); g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+dur); o.start(); o.stop(actx.currentTime+dur); }catch(e){} }
-function tick(){ tone(660,0.07,'sine',0.08); }
-function okSound(){ tone(523,0.12,'sine',0.12); setTimeout(function(){tone(784,0.18,'sine',0.12);},100); }
-function noSound(){ tone(180,0.25,'square',0.08); }
-function winSound(){ [523,659,784,1047].forEach(function(f,i){setTimeout(function(){tone(f,0.2,'sine',0.12);},i*120);}); }
-function boing(){ try{ ensureAudio(); var o=actx.createOscillator(),g=actx.createGain(); o.connect(g);g.connect(actx.destination); o.type='sine'; var t=actx.currentTime; o.frequency.setValueAtTime(180,t); o.frequency.exponentialRampToValueAtTime(750,t+0.12); o.frequency.exponentialRampToValueAtTime(280,t+0.32); g.gain.setValueAtTime(0.18,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.4); o.start(t); o.stop(t+0.4); }catch(e){} }
+function ensureAudio(){try{if(!actx)actx=new (window.AudioContext||window.webkitAudioContext)();if(actx.state==='suspended')actx.resume();}catch(e){}}
+function tone(f,d,t,v){try{ensureAudio();var o=actx.createOscillator(),g=actx.createGain();o.connect(g);g.connect(actx.destination);o.type=t||'sine';o.frequency.value=f;g.gain.setValueAtTime(v||0.12,actx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+d);o.start();o.stop(actx.currentTime+d);}catch(e){}}
+function tick(){tone(660,0.06,'sine',0.07);}
+function okS(){tone(523,0.12);setTimeout(function(){tone(784,0.18);},100);}
+function noS(){tone(180,0.25,'square',0.08);}
+function winS(){[523,659,784,1047].forEach(function(f,i){setTimeout(function(){tone(f,0.2);},i*120);});}
+document.addEventListener('click',function(e){if(e.target.closest('.btn,.opt,.subject-card,input,select,.tab')){tick();}},true);
 
-/* ============ BANANA CHARACTER ============ */
-var bananaEl=document.getElementById("banana");
-bananaEl.innerHTML='<svg viewBox="0 0 70 80" width="70" height="80" xmlns="http://www.w3.org/2000/svg">'+
-  '<g id="bn-body">'+
-  '<path d="M14,58 C6,40 12,14 38,10 C52,8 62,16 60,28 C58,36 52,40 46,37 C41,35 40,28 44,22 C39,20 28,23 24,33 C20,42 21,52 27,57 C31,60 29,64 24,64 C17,64 16,60 14,58 Z" fill="#fde047" stroke="#a16207" stroke-width="2.5" stroke-linejoin="round"/>'+
-  '<ellipse cx="38" cy="10" rx="5" ry="4" fill="#78350f"/>'+
-  '<circle cx="30" cy="30" r="5.5" fill="#fff" stroke="#a16207" stroke-width="1.2"/><circle cx="31.5" cy="31" r="2.6" fill="#1f2937"/>'+
-  '<circle cx="44" cy="29" r="5.5" fill="#fff" stroke="#a16207" stroke-width="1.2"/><circle cx="45.5" cy="30" r="2.6" fill="#1f2937"/>'+
-  '<path d="M32,40 Q38,45 45,40" fill="none" stroke="#7c2d12" stroke-width="2" stroke-linecap="round"/>'+
-  '<path d="M14,42 Q6,46 8,54" fill="none" stroke="#a16207" stroke-width="3" stroke-linecap="round"/><circle cx="8" cy="55" r="3.5" fill="#fde047" stroke="#a16207" stroke-width="1.5"/>'+
-  '<path d="M60,40 Q68,44 66,52" fill="none" stroke="#a16207" stroke-width="3" stroke-linecap="round"/><circle cx="66" cy="53" r="3.5" fill="#fde047" stroke="#a16207" stroke-width="1.5"/>'+
-  '<path d="M28,64 L26,74" stroke="#a16207" stroke-width="3" stroke-linecap="round"/><ellipse cx="24" cy="75" rx="5" ry="3" fill="#a16207"/>'+
-  '<path d="M42,64 L44,74" stroke="#a16207" stroke-width="3" stroke-linecap="round"/><ellipse cx="46" cy="75" rx="5" ry="3" fill="#a16207"/>'+
-  '</g></svg>';
+/* ===== STORAGE ===== */
+function get(k,d){try{return JSON.parse(localStorage.getItem(k))||d;}catch(e){return d;}}
+function set(k,v){localStorage.setItem(k,JSON.stringify(v));}
+var USERS=function(){var u=get('quiz_users',[]);if(!u.length){u.push({id:'admin',username:'Admin',password:'200113',avatar:'',isAdmin:true,createdAt:Date.now(),status:{at:'idle',time:Date.now()}});set('quiz_users',u);}return u;}();
+function saveUsers(){set('quiz_users',USERS);}
+var THEME=get('quiz_theme',{type:'default'});
+var SCHEDULE=get('quiz_schedule',[
+  {id:1,date:'06/11/2026',title:'Kiểm tra giữa kỳ I - Lịch Sử & Địa Lí',note:'60 phút, tại lớp 8A'},
+  {id:2,date:'08/11/2026',title:'Kiểm tra giữa kỳ I - Công Nghệ',note:'45 phút, có phần tự luận vẽ'},
+  {id:3,date:'10/11/2026',title:'Kiểm tra giữa kỳ I - KHTN 8 (Hóa Học)',note:'45 phút, trắc nghiệm và bài tập toán hóa'}
+]);
+var SESSION=get('quiz_session',null);
+var ADMIN_PW='200113';
 
-var bn={x:20,y:20,vx:1.3,vy:0.9,w:70,h:80,jumpStart:0,jumping:false,face:1};
-var app=document.getElementById("app");
-function bananaLoop(now){
-  var W=Math.max(app.clientWidth-70,100);
-  var H=Math.min(Math.max(app.clientHeight-80,300),560);
-  bn.x+=bn.vx; bn.y+=bn.vy;
-  if(bn.x<=0){bn.x=0;bn.vx=Math.abs(bn.vx);bn.face=1;}
-  if(bn.x>=W){bn.x=W;bn.vx=-Math.abs(bn.vx);bn.face=-1;}
-  if(bn.y<=0){bn.y=0;bn.vy=Math.abs(bn.vy);}
-  if(bn.y>=H){bn.y=H;bn.vy=-Math.abs(bn.vy);}
-  var jy=0, scaleStr="";
-  if(bn.jumping){
-    var t=(now-bn.jumpStart)/450;
-    if(t>=1){bn.jumping=false;}
-    else{ jy=-Math.sin(t*Math.PI)*110; var st=Math.sin(t*Math.PI); scaleStr=" scaleY("+(1+st*0.25)+") scaleX("+(1-st*0.15)+")"; }
-  }
-  bananaEl.style.transform="translate("+bn.x+"px,"+(bn.y+jy)+"px) scaleX("+bn.face+")"+scaleStr;
-  requestAnimationFrame(bananaLoop);
-}
-requestAnimationFrame(bananaLoop);
-bananaEl.addEventListener("click",function(e){
-  e.stopPropagation();
-  boing();
-  bn.jumping=true; bn.jumpStart=performance.now();
-  bn.vx=(Math.random()<0.5?-1:1)*(0.8+Math.random()*1.2);
-  bn.vy=(Math.random()<0.5?-1:1)*(0.6+Math.random()*1.0);
-});
-
-/* ============ DATA ============ */
-var LSD=[
-{q:"Lực lượng lãnh đạo cuộc Cách mạng tư sản Anh thế kỉ XVII là:",o:["Giai cấp công nhân và nông dân.","Tư sản và Quý tộc mới.","Tăng lữ và Quý tộc phong kiến.","Chủ nô và tư sản."],a:1},
-{q:"Đỉnh cao của cuộc Cách mạng tư sản Pháp cuối thế kỉ XVIII gắn liền với sự cầm quyền của phái nào?",o:["Phái Lập hiến.","Phái Gi-rông-đanh.","Phái Gia-cô-banh (Chuyên chính dân chủ cách mạng).","Phái Hoàng gia."],a:2},
-{q:"Phát minh nào khởi đầu cho cuộc Cách mạng công nghiệp ở Anh giữa thế kỉ XVIII?",o:["Máy hơi nước của Giêm Oát.","Máy kéo sợi Ghen-ni của Giê-mơ Han-gri-vơ.","Động cơ đốt trong.","Đầu máy xe lửa."],a:1},
-{q:"Động cơ hơi nước do Giêm Oát chế tạo hoàn chỉnh vào năm nào?",o:["1764.","1769.","1784.","1807."],a:2},
-{q:"Quốc gia duy nhất ở khu vực Đông Nam Á giữ được nền độc lập tương đối trước sự xâm lược của thực dân phương Tây là:",o:["Đại Việt.","Xiêm (Thái Lan).","Ma-lắc-ca.","Chân Lạp."],a:1},
-{q:"Vương triều Mạc được thành lập vào năm nào?",o:["1527.","1533.","1592.","1600."],a:0},
-{q:"Ai là người có công đặt nền móng cho cơ nghiệp chúa Nguyễn ở Đàng Trong khi vào trấn thủ Thuận Hóa năm 1558?",o:["Nguyễn Kim.","Nguyễn Hoàng.","Nguyễn Phúc Nguyên.","Nguyễn Ánh."],a:1},
-{q:"Ranh giới chia cắt đất nước thành Đàng Trong và Đàng Ngoài trong hơn 1 thế kỉ là:",o:["Sông Bến Hải.","Sông Gianh (Quảng Trị).","Sông Mã.","Đèo Hải Vân."],a:1},
-{q:"Lực lượng chính tham gia các cuộc khởi nghĩa nông dân ở Đàng Ngoài thế kỉ XVIII là:",o:["Nông dân nghèo.","Thợ thủ công.","Thương nhân.","Quý tộc."],a:0},
-{q:"Đội Hoàng Sa và Đội Bắc Hải được thành lập dưới thời các chúa Nguyễn có nhiệm vụ chính là:",o:["Thu thuế thương chánh.","Thăm dò, khai thác sản vật, thu gom hàng hóa và dựng mốc chủ quyền ở Hoàng Sa - Trường Sa.","Đánh dẹp cướp biển.","Mở rộng buôn bán với nước ngoài."],a:1},
-{q:"Điểm cực Bắc phần đất liền nước ta thuộc xã Lũng Cú, tỉnh nào?",o:["Tuyên Quang.","Lào Cai.","Cao Bằng.","Lạng Sơn."],a:0},
-{q:"Điểm cực Nam phần đất liền nước ta nằm ở tọa độ địa lí nào?",o:["8°34'B.","23°23'B.","102°09'Đ.","109°24'Đ."],a:0},
-{q:"Địa hình đồi núi chiếm bao nhiêu phần diện tích phần đất liền Việt Nam?",o:["1/4.","1/2.","2/3.","3/4."],a:3},
-{q:"Hướng nghiêng chung của địa hình Việt Nam là:",o:["Bắc - Nam.","Tây - Đông.","Tây Bắc - Đông Nam.","Đông Bắc - Tây Nam."],a:2},
-{q:"Dãy núi nào sau đây ở nước ta chạy theo hướng Tây Bắc - Đông Nam?",o:["Hoàng Liên Sơn.","Bắc Sơn.","Ngân Sơn.","Đông Triều."],a:0},
-{q:"Đỉnh núi cao nhất Việt Nam và toàn bộ bán đảo Đông Dương là:",o:["Ngọc Linh.","Phan-xi-păng.","Tây Côn Lĩnh.","Pu Si Lung."],a:1},
-{q:"Loại khoáng sản có trữ lượng lớn nhất và tập trung chủ yếu ở vùng Đông Bắc nước ta là:",o:["Dầu mỏ.","Than đá.","Bô-xít.","Sắt."],a:1},
-{q:"Đường bờ biển nước ta có chiều dài khoảng bao nhiêu ki-lô-mét?",o:["2 360 km.","3 260 km.","4 500 km.","1 000 km."],a:1},
-{q:"Loại đất chiếm diện tích lớn nhất ở vùng đồi núi nước ta là:",o:["Đất phù sa.","Đất Fe-ra-lít.","Đất xám bạc màu.","Đất mùn núi cao."],a:1},
-{q:"Nước ta có nguồn tài nguyên khoáng sản phong phú là do:",o:["Nằm ở trung tâm Châu Á.","Nằm ở vị trí giao nhau giữa các vành đai sinh khoáng lớn.","Có nhiều đồng bằng rộng lớn.","Khí hậu nhiệt đới ẩm mưa nhiều."],a:1}
-];
-var CN=[
-{q:"Theo tiêu chuẩn TCVN 7285:2003, khổ giấy A4 có kích thước là bao nhiêu?",o:["841 x 1189 mm.","594 x 841 mm.","297 x 420 mm.","210 x 297 mm."],a:3},
-{q:"Loại nét vẽ nào sau đây được sử dụng để vẽ đường khung bản vẽ và đường khung tên?",o:["Nét liền mảnh.","Nét liền đậm.","Nét đứt mảnh.","Nét gạch chấm mảnh."],a:1},
-{q:"Tỉ lệ 1:2 ghi trên bản vẽ kỹ thuật thể hiện loại tỉ lệ nào?",o:["Tỉ lệ nguyên hình.","Tỉ lệ phóng to.","Tỉ lệ thu nhỏ.","Tỉ lệ tự do."],a:2},
-{q:"Trong phương pháp chiếu vuông góc, hướng chiếu từ trước vào mặt phẳng chiếu đứng cho ta hình chiếu nào?",o:["Hình chiếu đứng.","Hình chiếu bằng.","Hình chiếu cạnh.","Hình chiếu phối cảnh."],a:0},
-{q:"Trên bản vẽ kỹ thuật, hình chiếu bằng được bố trí ở vị trí nào so với hình chiếu đứng?",o:["Ở bên trái hình chiếu đứng.","Ở bên phải hình chiếu đứng.","Ở phía dưới hình chiếu đứng.","Ở phía trên hình chiếu đứng."],a:2},
-{q:"Hình chiếu vuông góc của hình hộp chữ nhật theo hướng chiếu từ trước là hình gì?",o:["Hình tam giác.","Hình tròn.","Hình chữ nhật.","Hình thoi."],a:2},
-{q:"Khối tròn xoay nào được tạo thành khi quay một hình tam giác vuông quanh một cạnh góc vuông cố định?",o:["Hình trụ.","Hình nón.","Hình cầu.","Hình hộp."],a:1},
-{q:"Hướng chiếu từ trái sang phải thu được hình chiếu nào sau đây?",o:["Hình chiếu đứng.","Hình chiếu bằng.","Hình chiếu cạnh.","Hình chiếu từ sau."],a:2},
-{q:"Hình chiếu vuông góc của hình cầu trên mọi mặt phẳng chiếu đều có dạng hình gì?",o:["Hình chữ nhật.","Hình tròn.","Hình tam giác.","Hình vuông."],a:1},
-{q:"Phương pháp chiếu vuông góc sử dụng các tia chiếu có đặc điểm gì đối với mặt phẳng chiếu?",o:["Song song với mặt phẳng chiếu.","Song song với nhau và vuông góc với mặt phẳng chiếu.","Đồng quy tại một điểm trong không gian.","Xiên góc với mặt phẳng chiếu."],a:1},
-{q:"Bản vẽ chi tiết gồm bao nhiêu nội dung chính?",o:["3 nội dung.","4 nội dung.","5 nội dung.","6 nội dung."],a:1},
-{q:"Nội dung nào sau đây KHÔNG có trên bản vẽ chi tiết?",o:["Khung tên.","Hình biểu diễn.","Bảng kê.","Yêu cầu kỹ thuật."],a:2},
-{q:"Khung tên của bản vẽ chi tiết thường được đặt ở vị trí nào?",o:["Góc trên bên trái bản vẽ.","Góc trên bên phải bản vẽ.","Góc dưới bên trái bản vẽ.","Góc dưới bên phải bản vẽ."],a:3},
-{q:"Nội dung của khung tên bao gồm?",o:["Tên gọi, vật liệu và tỉ lệ của chi tiết.","Gia công và xử lý bề mặt chi tiết.","Số lượng và tỉ lệ vẽ chi tiết.","Danh mục các chi tiết trong bộ sản phẩm."],a:0},
-{q:"Bản vẽ lắp được sử dụng chính vào mục đích gì trong kỹ thuật?",o:["Dùng để chế tạo một chi tiết máy duy nhất.","Dùng để lắp ráp, kiểm tra và vận hành sản phẩm gồm nhiều chi tiết.","Dùng để thi công xây dựng công trình nhà ở.","Dùng để tính toán giá thành nguyên vật liệu."],a:1},
-{q:"Nội dung nào sau đây có trên bản vẽ lắp nhưng KHÔNG xuất hiện trên bản vẽ chi tiết?",o:["Khung tên.","Bảng kê.","Kích thước.","Hình biểu diễn."],a:1},
-{q:"Phát biểu nào sau đây ĐÚNG về quy tắc ghi kích thước trên bản vẽ kỹ thuật?",o:["Đơn vị đo kích thước độ dài ghi trên bản vẽ mặc định là cm.","Chữ số kích thước được ghi phía dưới đường kích thước.","Đường dóng kích thước được vẽ bằng nét liền đậm.","Đơn vị đo độ dài mặc định là milimét (mm) và không cần ghi đơn vị sau chữ số kích thước."],a:3},
-{q:"Khi vẽ một chi tiết có chiều dài thực tế 100 mm lên giấy vẽ, chiều dài nét vẽ đo được là 200 mm, nhưng số ghi kích thước trên bản vẽ vẫn ghi 100 mm. Bản vẽ đó đang sử dụng tỉ lệ nào?",o:["Tỉ lệ 1:1.","Tỉ lệ 2:1.","Tỉ lệ 1:2.","Tỉ lệ 5:1."],a:1},
-{q:"Tại sao khi biểu diễn hình chiếu vuông góc của các khối đa diện hoặc khối tròn xoay đơn giản, người ta thường chỉ cần dùng 2 hình chiếu?",o:["Vì hình chiếu thứ 3 trùng hoàn toàn với hình chiếu thứ 1.","Vì 2 hình chiếu đã đủ để xác định rõ hình dạng và kích thước ba chiều của vật thể.","Vì quy định tiêu chuẩn không cho phép vẽ 3 hình chiếu.","Vì để tiết kiệm diện tích trang giấy vẽ."],a:1},
-{q:"Hình chiếu đứng của một vật thể thể hiện những kích thước chiều nào của vật thể đó?",o:["Chiều dài và chiều rộng.","Chiều dài và chiều cao.","Chiều rộng và chiều cao.","Chỉ thể hiện chiều cao."],a:1},
-{q:"Cho một hình lăng trụ đứng đáy là tam giác đều đặt sao cho đáy song song với mặt phẳng chiếu bằng. Hình chiếu đứng của lăng trụ đó có dạng hình gì?",o:["Hình tam giác đều.","Hình chữ nhật.","Hình tròn.","Hình ngũ giác."],a:1},
-{q:"Hình chiếu cạnh của một hình nón đặt đứng (đáy song song với mặt phẳng chiếu bằng) có dạng hình gì?",o:["Hình tròn.","Hình chữ nhật.","Hình tam giác cân.","Hình elip."],a:2},
-{q:"Điểm khác biệt căn bản giữa nét liền đậm và nét đứt mảnh khi biểu diễn vật thể trên bản vẽ là gì?",o:["Nét liền đậm vẽ đường kích thước, nét đứt mảnh vẽ đường trục.","Nét liền đậm vẽ đường bao thấy, nét đứt mảnh vẽ đường bao khuất.","Nét liền đậm vẽ đường tâm, nét đứt mảnh vẽ khung bản vẽ.","Nét liền đậm vẽ khung tên, nét đứt mảnh vẽ đường dóng."],a:1},
-{q:"Trình tự đọc bản vẽ chi tiết đúng quy chuẩn kỹ thuật là trình tự nào sau đây?",o:["1. Khung tên -> 2. Kích thước -> 3. Hình biểu diễn -> 4. Yêu cầu kỹ thuật","1. Khung tên -> 2. Hình biểu diễn -> 3. Kích thước -> 4. Yêu cầu kỹ thuật","1. Hình biểu diễn -> 2. Khung tên -> 3. Yêu cầu kỹ thuật -> 4. Kích thước","1. Yêu cầu kỹ thuật -> 2. Khung tên -> 3. Hình biểu diễn -> 4. Kích thước"],a:1},
-{q:"Khi đọc bản vẽ chi tiết Gối đỡ, thông số chỉ dẫn 'Mạ kẽm' hoặc 'Làm tù cạnh' thuộc nội dung nào của bản vẽ?",o:["Khung tên.","Hình biểu diễn.","Kích thước.","Yêu cầu kỹ thuật."],a:3},
-{q:"Nội dung \"Yêu cầu kỹ thuật\" trên bản vẽ chi tiết cung cấp những chỉ dẫn quan trọng nào cho quá trình chế tạo?",o:["Tên gọi chi tiết, vật liệu chế tạo và tỉ lệ bản vẽ.","Các chỉ dẫn về phương pháp gia công và xử lý bề mặt chi tiết.","Danh mục tên gọi và số lượng các chi tiết cần lắp ráp.","Kích thước tổng thể chiều dài, chiều rộng và chiều cao của chi tiết."],a:1},
-{q:"Các kích thước ghi trên bản vẽ lắp thường bao gồm những nhóm kích thước nào?",o:["Kích thước chế tạo chi tiết của toàn bộ các chi tiết nhỏ.","Kích thước chung (chiều dài, rộng, cao của toàn bộ sản phẩm) và kích thước lắp ráp giữa các chi tiết.","Chỉ gồm kích thước chiều cao khung tên và bảng kê.","Chỉ gồm kích thước đường kính các bu lông và lỗ khoan."],a:1},
-{q:"So sánh giữa bản vẽ chi tiết và bản vẽ lắp, điểm khác nhau cơ bản về mục đích sử dụng là gì?",o:["Bản vẽ chi tiết dùng để chế tạo, kiểm tra chi tiết; bản vẽ lắp dùng để lắp ráp, kiểm tra các chi tiết thành sản phẩm.","Bản vẽ chi tiết dùng trong thi công xây dựng; bản vẽ lắp dùng trong ngành dệt may.","Bản vẽ chi tiết bắt buộc vẽ bằng tay; bản vẽ lắp bắt buộc vẽ trên phần mềm vi tính.","Bản vẽ chi tiết có bảng kê; bản vẽ lắp có yêu cầu kỹ thuật."],a:0},
-{q:"Theo tiêu chuẩn TCVN 7285:2003, khổ giấy A3 có kích thước tiêu chuẩn là bao nhiêu?",o:["210 x 297 mm.","297 x 420 mm.","420 x 594 mm.","594 x 841 mm."],a:1},
-{q:"Để vẽ đường dóng kích thước và đường kích thước trên bản vẽ kỹ thuật, ta sử dụng nét vẽ nào?",o:["Nét liền đậm.","Nét liền mảnh.","Nét đứt mảnh.","Nét gạch chấm mảnh."],a:1},
-{q:"Khi biểu diễn một chi tiết siêu nhỏ trên bản vẽ, người ta dùng tỉ lệ 5:1. Tỉ lệ này thuộc loại tỉ lệ nào?",o:["Tỉ lệ thu nhỏ.","Tỉ lệ nguyên hình.","Tỉ lệ phóng to.","Tỉ lệ tự do."],a:2},
-{q:"Trên bản vẽ kỹ thuật tiêu chuẩn, hình chiếu cạnh được đặt ở vị trí nào so với hình chiếu đứng?",o:["Ở phía dưới hình chiếu đứng.","Ở phía trên hình chiếu đứng.","Ở bên phải hình chiếu đứng.","Ở bên trái hình chiếu đứng."],a:2},
-{q:"Hình chiếu bằng của một hình lăng trụ đứng tam giác đều (đáy song song với mặt phẳng chiếu bằng) có dạng hình gì?",o:["Hình chữ nhật.","Hình tam giác đều.","Hình tròn.","Hình thoi."],a:1},
-{q:"Khi quay một hình chữ nhật một vòng quanh một cạnh cố định, khối tròn xoay thu được là khối nào?",o:["Hình nón.","Hình cầu.","Hình trụ.","Hình nón cụt."],a:2},
-{q:"Khi quay một hình bán nguyệt một vòng quanh đường kính cố định, khối tròn xoay thu được là khối nào?",o:["Hình trụ.","Hình cầu.","Hình nón.","Hình vành khăn."],a:1},
-{q:"Nội dung 'Hình biểu diễn' trên bản vẽ chi tiết cho người đọc biết thông tin gì?",o:["Vật liệu và tỉ lệ vẽ.","Hình dạng, cấu tạo của chi tiết.","Số lượng chi tiết cần làm.","Giá thành của chi tiết."],a:1},
-{q:"Hình chiếu đứng của hình cầu là?",o:["Hình chữ nhật.","Hình tam giác.","Hình vuông.","Hình tròn."],a:3},
-{q:"Hình chiếu đứng, hình chiếu bằng, hình chiếu cạnh của vật thể hình trụ sau lần lượt là?",o:["Hình chữ nhật, hình tròn, hình chữ nhật.","Tam giác vuông, hình chữ nhật, hình chữ nhật.","Hình tròn, hình chữ nhật, hình chữ nhật.","Hình chữ nhật, hình tròn, hình tròn."],a:0},
-{q:"Đường trục, đường tâm của hình tròn, đường phân giác trên bản vẽ kỹ thuật được vẽ bằng nét gì?",o:["Nét liền đậm.","Nét đứt mảnh.","Nét gạch chấm mảnh.","Nét liền mảnh."],a:2},
-{q:"Theo tiêu chuẩn TCVN 7285:2003, khổ giấy A1 có kích thước là bao nhiêu?",o:["841 x 1189 mm.","594 x 841 mm.","297 x 420 mm.","210 x 297 mm."],a:1}
-];
-var letters=["A","B","C","D"];
-var SUBJECTS={
-  lsdl:{key:"lsdl",name:"Lịch Sử - Địa Lí 8",short:"LS-ĐL",q:LSD,count:20,accent:"#b45309",accentSoft:"rgba(180,83,9,.14)",accent2:"#2d6b8a",bg:"#fbf6ee",card:"#ffffff",text:"#0f172a",muted:"#64748b",border:"rgba(15,23,42,.07)",wrong:"#dc2626",wrongSoft:"rgba(220,38,38,.1)"},
-  cn:{key:"cn",name:"Công Nghệ 8 (Vẽ Kỹ Thuật)",short:"CN",q:CN,count:40,accent:"#0d7a8a",accentSoft:"rgba(13,122,138,.14)",accent2:"#c47046",bg:"#eef5f7",card:"#ffffff",text:"#0f172a",muted:"#64748b",border:"rgba(15,23,42,.07)",wrong:"#dc2626",wrongSoft:"rgba(220,38,38,.1)"}
+/* ===== THEMES ===== */
+var THEMES={
+  default:{bg:'linear-gradient(135deg,#a8edea 0%,#fed6e3 100%)',accent:'#297a2e',accent2:'#d97706',card:'#ffffff',text:'#0f172a',muted:'#64748b',border:'rgba(15,23,42,.08)',wrong:'#dc2626'},
+  elsa:{bg:'linear-gradient(160deg,#e0f2fe 0%,#bae6fd 40%,#f0f9ff 100%)',accent:'#0369a1',accent2:'#7dd3fc',card:'rgba(255,255,255,.92)',text:'#0c4a6e',muted:'#64748b',border:'rgba(3,105,161,.15)',wrong:'#dc2626'},
+  kitty:{bg:'linear-gradient(135deg,#fce7f3 0%,#fbcfe8 50%,#fff1f2 100%)',accent:'#db2777',accent2:'#f472b6',card:'rgba(255,255,255,.92)',text:'#831843',muted:'#9d174d',border:'rgba(219,39,119,.15)',wrong:'#dc2626'},
+  ocean:{bg:'linear-gradient(135deg,#0f2027 0%,#203a43 50%,#2c5364 100%)',accent:'#22d3ee',accent2:'#a78bfa',card:'rgba(15,23,42,.85)',text:'#f1f5f9',muted:'#94a3b8',border:'rgba(148,163,184,.2)',wrong:'#f87171'},
+  sunset:{bg:'linear-gradient(135deg,#ff9a9e 0%,#fecfef 50%,#fecfef 100%)',accent:'#c2410c',accent2:'#db2777',card:'rgba(255,255,255,.92)',text:'#431407',muted:'#7c2d12',border:'rgba(194,65,12,.15)',wrong:'#dc2626'}
 };
-var HOME={bg:"#faf9f4",accent:"#297a2e",accentSoft:"rgba(41,122,46,.14)",accent2:"#d97706",text:"#0f172a",muted:"#64748b",border:"rgba(15,23,42,.08)",card:"#ffffff"};
-
-var main=document.getElementById("main");
-var state={name:"",subject:null,idx:0,score:0,answers:[],saved:false};
-
-function applyTheme(t){
-  app.style.background=t.bg;
-  var root=document.documentElement.style;
-  root.setProperty('--accent',t.accent); root.setProperty('--accent-soft',t.accentSoft);
-  root.setProperty('--accent2',t.accent2); root.setProperty('--bg',t.bg);
-  root.setProperty('--card',t.card); root.setProperty('--text',t.text);
-  root.setProperty('--muted',t.muted); root.setProperty('--border',t.border);
-  root.setProperty('--wrong',t.wrong); root.setProperty('--wrong-soft',t.wrongSoft);
+function applyTheme(){
+  var tKey=(ME&&ME.theme!=null)?ME.theme:THEME.type;
+  var tImg=(ME&&ME.theme==='image')?ME.bgImg:THEME.img;
+  var t=THEMES[tKey]||THEMES.default;
+  var app=document.getElementById('app');
+  if(tKey==='image'&&tImg){app.style.backgroundImage='url('+tImg+')';app.style.backgroundColor='#0f172a';}
+  else{app.style.backgroundImage=t.bg;app.style.background='';app.style.background=t.bg;}
+  var r=document.documentElement.style;
+  r.setProperty('--accent',t.accent);r.setProperty('--accent2',t.accent2);r.setProperty('--card',t.card);
+  r.setProperty('--text',t.text);r.setProperty('--muted',t.muted);r.setProperty('--border',t.border);r.setProperty('--wrong',t.wrong);
+  r.setProperty('--accent-soft',t.accent+'22');r.setProperty('--wrong-soft',t.wrong+'1a');r.setProperty('--accent2-soft',t.accent2+'22');
 }
 
-function lbKey(k){return "quiz_lb_"+k;}
-function getLB(k){try{return JSON.parse(localStorage.getItem(lbKey(k))||"[]");}catch(e){return[];}}
-function saveLB(k,name,score,total){
-  var d=getLB(k);
-  d.push({name:name,score:score,total:total,pct:Math.round(score/total*100),date:new Date().toLocaleDateString("vi-VN")});
-  localStorage.setItem(lbKey(k),JSON.stringify(d.slice(-200)));
+/* ===== DATA (3 MÔN, ĐẦY ĐỦ CÂU HỎI VÀ GIẢI THÍCH) ===== */
+
+// 1. KHTN 8 (Hóa Học) - 30 câu từ 3 ảnh gửi
+var KHTN=[
+  {q:"Câu 1: Trong các câu sau, câu nào chỉ hiện tượng vật lí?",o:["Đường cháy thành than.","Cơm bị ôi thiu.","Sữa chua lên men.","Nước hóa đá dưới 0°C."],a:3,ex:"Nước hóa đá dưới 0°C chỉ là sự thay đổi trạng thái từ thể lỏng sang thể rắn của nước, không sinh ra chất mới nên là hiện tượng vật lí."},
+  {q:"Câu 2: Một vật thể bằng sắt để ngoài trời, sau một thời gian bị gỉ. Hỏi khối lượng của vật thay đổi thế nào so với khối lượng của vật trước khi gỉ?",o:["Tăng.","Giảm.","Không thay đổi.","Không thể biết."],a:0,ex:"Khi sắt bị gỉ, sắt (Fe) đã phản ứng kết hợp với oxygen (O2) và hơi nước trong không khí tạo thành gỉ sắt (Fe2O3.nH2O). Khối lượng gỉ sắt = mFe + mO2 + mH2O nên lớn hơn khối lượng sắt ban đầu (Tăng)."},
+  {q:"Câu 3: Acid có trong dạ dày của người và động vật giúp tiêu hóa thức ăn là:",o:["Sulfuric acid.","Acetic acid.","Stearic acid.","Hydrochloric acid."],a:3,ex:"Dịch vị dạ dày chứa acid hydrochloric (HCl) nồng độ khoảng 0,0001 đến 0,001 M (pH ≈ 1.5 - 3.5) giúp tiêu hóa thức ăn chứa protein."},
+  {q:"Câu 4: Mol là lượng chất có chứa bao nhiêu hạt vi mô (nguyên tử, phân tử, ...) của chất đó?",o:["6,022 x 10^22.","6,022 x 10^23.","6,022 x 10^24.","6,022 x 10^25."],a:1,ex:"Theo định nghĩa tiêu chuẩn, 1 mol chứa số Avogadro (N = 6,022 × 10²³) hạt vi mô."},
+  {q:"Câu 5: Khối lượng nguyên tử oxygen là 16 amu, khối lượng mol (M) nguyên tử của oxygen là:",o:["32 kg/mol.","16 kg/mol.","16 g/mol.","32 g/mol."],a:2,ex:"Khối lượng mol nguyên tử (tính bằng g/mol) có trị số bằng khối lượng nguyên tử (tính bằng amu). Oxygen có khối lượng nguyên tử 16 amu nên M = 16 g/mol."},
+  {q:"Câu 6: Dung dịch H2SO4 loãng tác dụng với chất nào tạo ra khí hydrogen?",o:["NaOH.","Fe.","CaO.","CO2."],a:1,ex:"Kim loại Fe đứng trước H trong dãy hoạt động hóa học nên tác dụng với H2SO4 loãng giải phóng khí H2: Fe + H2SO4 -> FeSO4 + H2↑."},
+  {q:"Câu 7: Khối lượng mol phân tử của Fe2O3 là:",o:["155 g/mol.","160 g/mol.","160 amu.","170 g/mol."],a:1,ex:"M(Fe2O3) = 56 × 2 + 16 × 3 = 112 + 48 = 160 g/mol."},
+  {q:"Câu 8: Với 0,25 mol vôi sống CaO có khối lượng là:",o:["10 gam.","5 gam.","14 gam.","28 gam."],a:2,ex:"M(CaO) = 40 + 16 = 56 g/mol. m = n × M = 0,25 × 56 = 14 gam."},
+  {q:"Câu 9: Khi hòa tan dầu ăn trong cốc xăng thì xăng đóng vai trò gì?",o:["Chất tan.","Dung môi.","Chất bảo hòa.","Chất chưa bảo hòa."],a:1,ex:"Xăng hòa tan được dầu ăn, do đó xăng là chất hòa tan chất khác nên gọi là dung môi."},
+  {q:"Câu 10: Hai chất không thể hòa tan với nhau tạo thành dung dịch là:",o:["Nước và đường.","Dầu ăn và xăng.","Rượu và nước.","Dầu ăn và nước."],a:3,ex:"Dầu ăn không tan trong nước và nhẹ hơn nước nên tách lớp, không tạo thành dung dịch đồng nhất."},
+  {q:"Câu 11: Thang pH được dùng để:",o:["Biểu thị độ acid của dung dịch.","Biểu thị độ base của dung dịch.","Biểu thị độ acid, base của dung dịch.","Biểu thị độ mặn của dung dịch."],a:2,ex:"Thang pH từ 1-14 được sử dụng để đánh giá độ acid (pH < 7), trung tính (pH = 7) hoặc độ base (pH > 7) của dung dịch."},
+  {q:"Câu 12: Hòa tan 14,36 gam NaCl vào 40 gam nước ở 20°C thì được dung dịch bão hòa. Độ tan của NaCl ở nhiệt độ đó là:",o:["35,5 gam.","35,9 gam.","36,5 gam.","37,2 gam."],a:1,ex:"Độ tan S = (m_chất_tan / m_nước) × 100 = (14,36 / 40) × 100 = 35,9 gam (trên 100g H2O)."},
+  {q:"Câu 13: Dãy gồm các kim loại tác dụng được với dung dịch H2SO4 loãng là:",o:["Fe, Cu, Mg.","Zn, Fe, Cu.","Zn, Fe, Al.","Fe, Zn, Ag."],a:2,ex:"Các kim loại đứng trước Hydrogen trong dãy hoạt động hóa học (như Zn, Fe, Al, Mg) tác dụng được với H2SO4 loãng. Cu và Ag đứng sau H nên không phản ứng."},
+  {q:"Câu 14: Khi cho đường vào nước rồi đun lên, độ tan của đường trong nước sẽ thay đổi như thế nào?",o:["Tăng lên.","Giảm đi.","Không đổi.","Không xác định được."],a:0,ex:"Đối với đa số chất rắn (như đường, muối), độ tan trong nước tăng lên khi nhiệt độ tăng."},
+  {q:"Câu 15: Chất tác dụng với nước tạo ra dung dịch base là:",o:["CO2.","Na2O.","SO2.","P2O5."],a:1,ex:"Oxide base của kim loại kiềm/kiềm thổ tác dụng với nước tạo thành dung dịch base (kiềm): Na2O + H2O -> 2NaOH."},
+  {q:"Câu 16: Cho phản ứng: A + B -> C + D. Biểu thức về công thức khối lượng của các chất nào sau đây là đúng?",o:["mA + mB = mC + mD.","mA = mB + mC + mD.","mA + mB = mC - mD.","mA + mB - mC = mD."],a:0,ex:"Theo Định luật bảo toàn khối lượng, tổng khối lượng các chất tham gia phản ứng bằng tổng khối lượng các chất sản phẩm tạo thành."},
+  {q:"Câu 17: Cho phương trình: 4Al + 3O2 -> 2Al2O3. Biết khối lượng Al phản ứng là 1,35 gam, lượng Al2O3 thu được là 2,55 gam. Lượng O2 đã tham gia phản ứng là:",o:["1,25 gam.","1,2 gam.","1,1 gam.","3,85 gam."],a:1,ex:"Theo định luật bảo toàn khối lượng: mAl + mO2 = mAl2O3 ⇒ mO2 = 2,55 - 1,35 = 1,2 gam."},
+  {q:"Câu 18: Đốt phosphorus (P) trong khí oxygen (O2) thu được diphosphorus pentoxide (P2O5). Phương trình phản ứng nào sau đây đã viết đúng?",o:["4P + 5O2 -> 2P2O5.","2P + O2 -> P2O5.","P + O2 -> P2O5.","2P + 5O2 -> 2P2O5."],a:0,ex:"Cân bằng đúng số nguyên tử 2 vế: 4 nguyên tử P và 10 nguyên tử O ở cả 2 vế (4P + 5O2 -> 2P2O5)."},
+  {q:"Câu 19: Tỉ khối của khí X đối với không khí nhỏ hơn 1 (d_X/KK < 1). X là khí nào sau đây?",o:["O2.","H2S.","CO2.","N2."],a:3,ex:"M_KK ≈ 29 g/mol. Khí N2 có M = 28 g/mol < 29 nên d(N2/KK) = 28/29 < 1 (nhẹ hơn không khí). O2(32), H2S(34), CO2(44) đều nặng hơn không khí."},
+  {q:"Câu 20: Cho 5,6 g sắt tác dụng với HCl dư, sau phản ứng thể tích khí H2 thu được (ở đkc 25°C, 1 bar) là:",o:["1,24 lit.","2,479 lit.","12,4 lit.","24,79 lit."],a:1,ex:"nFe = 5,6 / 56 = 0,1 mol. PTHH: Fe + 2HCl -> FeCl2 + H2. nH2 = nFe = 0,1 mol. VH2 (đkc) = 0,1 × 24,79 = 2,479 lít."},
+  {q:"Câu 21: Cho phương trình: 2KClO3 -> 2KCl + 3O2. Giả sử phản ứng hoàn toàn, từ 0,6 mol KClO3 sẽ thu được bao nhiêu mol khí oxygen?",o:["0,9 mol.","0,45 mol.","0,2 mol.","0,4 mol."],a:0,ex:"Theo PTHH: 2 mol KClO3 tạo ra 3 mol O2. Vậy 0,6 mol KClO3 sẽ tạo ra: nO2 = (0,6 × 3) / 2 = 0,9 mol."},
+  {q:"Câu 22: Tốc độ phản ứng không phụ thuộc yếu tố nào sau đây?",o:["Thời gian xảy ra phản ứng.","Bề mặt tiếp xúc giữa các chất phản ứng.","Nồng độ các chất tham gia phản ứng.","Chất xúc tác."],a:0,ex:"Các yếu tố ảnh hưởng tốc độ phản ứng bao gồm: nồng độ, nhiệt độ, diện tích tiếp xúc, áp suất và chất xúc tác. Thời gian là đại lượng đo lường, không phải yếu tố ảnh hưởng đến tốc độ."},
+  {q:"Câu 23: Cho thanh nhôm tác dụng với HCl thu được 26,7 gam muối nhôm và 0,6 gam khí H2. Tổng khối lượng các chất phản ứng (Al và HCl) là:",o:["26 gam.","27,3 gam.","26,1 gam.","25,5 gam."],a:1,ex:"Theo định luật bảo toàn khối lượng: m(chất phản ứng) = m(sản phẩm) = m_muối + m_H2 = 26,7 + 0,6 = 27,3 gam."},
+  {q:"Câu 24: Yếu tố nào dưới đây được sử dụng để làm tăng tốc độ phản ứng khi rắc men vào tinh bột đã nấu chín để ủ rượu?",o:["Áp suất.","Chất xúc tác.","Nhiệt độ.","Nồng độ."],a:1,ex:"Men rượu chứa các enzyme đóng vai trò là chất xúc tác sinh học giúp tăng tốc quá trình lên men tinh bột thành ethanol."},
+  {q:"Câu 25: Base nào sau đây là kiềm (base tan trong nước)?",o:["Ba(OH)2.","Cu(OH)2.","Mg(OH)2.","Fe(OH)3."],a:0,ex:"Ba(OH)2 là base tan tốt trong nước (dung dịch kiềm). Các base Cu(OH)2, Mg(OH)2, Fe(OH)3 là base không tan."},
+  {q:"Câu 26: Dãy các base đều làm đổi màu quỳ tím ẩm (thành xanh) và dung dịch phenolphthalein (thành hồng) là:",o:["KOH, Ca(OH)2, Cu(OH)2, Zn(OH)2.","NaOH, Al(OH)3, Ba(OH)2, Cu(OH)2.","Ca(OH)2, KOH, Zn(OH)2, Fe(OH)3.","NaOH, KOH, Ca(OH)2, Ba(OH)2."],a:3,ex:"Chỉ có các dung dịch base tan (kiềm) như NaOH, KOH, Ca(OH)2, Ba(OH)2 mới làm quỳ tím hóa xanh và phenolphthalein hóa hồng."},
+  {q:"Câu 27: Khối lượng H2O có trong 30 g dung dịch có nồng độ 3% là:",o:["10 g.","3 g.","29,1 g.","0,1 g."],a:2,ex:"m_chất_tan = (30 × 3) / 100 = 0,9 gam. Khối lượng nước m_H2O = m_dung_dịch - m_chất_tan = 30 - 0,9 = 29,1 gam."},
+  {q:"Câu 28: Dãy chất gồm các oxide phi kim (acidic oxide) là:",o:["MgO, CO2, SO2, P2O5.","Na2O, CO2, SO3, NO2.","SiO2, N2O5, CO2, SO2.","K2O, CO2, NO, Fe2O3."],a:2,ex:"SiO2, N2O5, CO2, SO2 đều là oxide cấu thành từ phi kim (Si, N, C, S) kết hợp với oxygen."},
+  {q:"Câu 29: Oxide nào sau đây là oxide lưỡng tính?",o:["BaO.","Al2O3.","SO3.","MgO."],a:1,ex:"Al2O3 (và ZnO) là oxide lưỡng tính vì phản ứng được với cả dung dịch acid lẫn dung dịch base tạo muối và nước."},
+  {q:"Câu 30: Khối lượng NaOH có trong 300 ml dung dịch nồng độ 0,15 M là:",o:["1,8 g.","0,045 g.","4,5 g.","0,125 g."],a:0,ex:"V = 300ml = 0,3 lít. Số mol n = CM × V = 0,15 × 0,3 = 0,045 mol. M(NaOH) = 40 g/mol. m = 0,045 × 40 = 1,8 gam."}
+];
+
+// 2. Lịch Sử & Địa Lí 8 - 20 câu
+var LSD=[
+  {q:"Lực lượng lãnh đạo cuộc Cách mạng tư sản Anh thế kỉ XVII là:",o:["Giai cấp công nhân và nông dân.","Tư sản và Quý tộc mới.","Tăng lữ và Quý tộc phong kiến.","Chủ nô và tư sản."],a:1,ex:"Cách mạng tư sản Anh do tầng lớp Quý tộc mới liên minh với giai cấp tư sản lãnh đạo lật đổ chế độ phong kiến."},
+  {q:"Đỉnh cao của cuộc Cách mạng tư sản Pháp cuối thế kỉ XVIII gắn liền với sự cầm quyền của phái nào?",o:["Phái Lập hiến.","Phái Gi-rông-đanh.","Phái Gia-cô-banh (Chuyên chính dân chủ cách mạng).","Phái Hoàng gia."],a:2,ex:"Chuyên chính dân chủ cách mạng Gia-cô-banh do Rô-be-xpi-e đứng đầu là đỉnh cao của cách mạng tư sản Pháp với những chính sách triệt để."},
+  {q:"Phát minh nào khởi đầu cho cuộc Cách mạng công nghiệp ở Anh giữa thế kỉ XVIII?",o:["Máy hơi nước của Giêm Oát.","Máy kéo sợi Ghen-ni của Giê-mơ Han-gri-vơ.","Động cơ đốt trong.","Đầu máy xe lửa."],a:1,ex:"Năm 1764, Giê-mơ Han-gri-vơ phát minh ra máy kéo sợi Ghen-ni, mở đầu cho cuộc cách mạng công nghiệp ở Anh."},
+  {q:"Động cơ hơi nước do Giêm Oát chế tạo hoàn chỉnh vào năm nào?",o:["1764.","1769.","1784.","1807."],a:2,ex:"Năm 1784, Giêm Oát hoàn thiện máy hơi nước, tạo ra nguồn động lực mới làm tăng năng suất lao động vượt bậc."},
+  {q:"Quốc gia duy nhất ở khu vực Đông Nam Á giữ được nền độc lập tương đối trước sự xâm lược của thực dân phương Tây là:",o:["Đại Việt.","Xiêm (Thái Lan).","Ma-lắc-ca.","Chân Lạp."],a:1,ex:"Nhờ chính sách ngoại giao khôn khéo và cải cách của vua Ra-ma V, Xiêm giữ được độc lập tương đối."},
+  {q:"Vương triều Mạc được thành lập vào năm nào?",o:["1527.","1533.","1592.","1600."],a:0,ex:"Tháng 6 năm 1527, Mạc Đăng Dung ép vua Lê Cung Hoàng nhường ngôi, lập ra vương triều Mạc."},
+  {q:"Ai là người có công đặt nền móng cho cơ nghiệp chúa Nguyễn ở Đàng Trong khi vào trấn thủ Thuận Hóa năm 1558?",o:["Nguyễn Kim.","Nguyễn Hoàng.","Nguyễn Phúc Nguyên.","Nguyễn Ánh."],a:1,ex:"Năm 1558, Nguyễn Hoàng vào trấn thủ Thuận Hóa, mở đầu cho cơ nghiệp các chúa Nguyễn ở Đàng Trong."},
+  {q:"Ranh giới chia cắt đất nước thành Đàng Trong và Đàng Ngoài trong hơn 1 thế kỉ là:",o:["Sông Bến Hải.","Sông Gianh (Quảng Bình).","Sông Mã.","Đèo Hải Vân."],a:1,ex:"Chiến tranh Trịnh - Nguyễn phân tranh lấy sông Gianh (Quảng Bình) làm ranh giới chia cắt đất nước."},
+  {q:"Lực lượng chính tham gia các cuộc khởi nghĩa nông dân ở Đàng Ngoài thế kỉ XVIII là:",o:["Nông dân nghèo.","Thợ thủ công.","Thương nhân.","Quý tộc."],a:0,ex:"Do chế độ phong kiến suy thoái, đời sống cực khổ khiến đông đảo nông dân nghèo đứng lên khởi nghĩa."},
+  {q:"Đội Hoàng Sa và Đội Bắc Hải được thành lập dưới thời các chúa Nguyễn có nhiệm vụ chính là:",o:["Thu thuế thương chánh.","Thăm dò, khai thác sản vật, thu gom hàng hóa và dựng mốc chủ quyền ở Hoàng Sa - Trường Sa.","Đánh dẹp cướp biển.","Mở rộng buôn bán với nước ngoài."],a:1,ex:"Đội Hoàng Sa và Bắc Hải lập ra để thực thi chủ quyền, khai thác sản vật và đo đạc hải trình quần đảo Hoàng Sa - Trường Sa."},
+  {q:"Điểm cực Bắc phần đất liền nước ta thuộc xã Lũng Cú, tỉnh nào?",o:["Tuyên Quang.","Lào Cai.","Cao Bằng.","Hà Giang (Lũng Cú)."],a:3,ex:"Điểm cực Bắc đất liền Việt Nam nằm ở xã Lũng Cú, huyện Đồng Văn, tỉnh Hà Giang (tọa độ 23°23'B)."},
+  {q:"Điểm cực Nam phần đất liền nước ta nằm ở tọa độ địa lí nào?",o:["8°34'B (Đất Mũi, Cà Mau).","23°23'B.","102°09'Đ.","109°24'Đ."],a:0,ex:"Điểm cực Nam phần đất liền tại xã Đất Mũi, huyện Ngọc Hiển, tỉnh Cà Mau có tọa độ 8°34'B."},
+  {q:"Địa hình đồi núi chiếm bao nhiêu phần diện tích phần đất liền Việt Nam?",o:["1/4.","1/2.","2/3.","3/4."],a:3,ex:"Địa hình Việt Nam có 3/4 diện tích là đồi núi, đồng bằng chỉ chiếm 1/4 diện tích đất liền."},
+  {q:"Hướng nghiêng chung của địa hình Việt Nam là:",o:["Bắc - Nam.","Tây - Đông.","Tây Bắc - Đông Nam.","Đông Bắc - Tây Nam."],a:2,ex:"Địa hình cao ở vùng tây bắc và thấp dần về phía đông nam nên hướng nghiêng chung là Tây Bắc - Đông Nam."},
+  {q:"Dãy núi nào sau đây ở nước ta chạy theo hướng Tây Bắc - Đông Nam?",o:["Hoàng Liên Sơn.","Bắc Sơn.","Ngân Sơn.","Đông Triều."],a:0,ex:"Hoàng Liên Sơn và Trường Sơn Bắc là các dãy núi lớn chạy theo hướng Tây Bắc - Đông Nam."},
+  {q:"Đỉnh núi cao nhất Việt Nam và toàn bộ bán đảo Đông Dương là:",o:["Ngọc Linh.","Phan-xi-păng (3143m).","Tây Côn Lĩnh.","Pu Si Lung."],a:1,ex:"Đỉnh Fansipan cao 3.143 m thuộc dãy Hoàng Liên Sơn, được mệnh danh là nóc nhà Đông Dương."},
+  {q:"Loại khoáng sản có trữ lượng lớn nhất và tập trung chủ yếu ở vùng Đông Bắc nước ta là:",o:["Dầu mỏ.","Than đá (Quảng Ninh).","Bô-xít.","Sắt."],a:1,ex:"Bể than Quảng Ninh ở vùng Đông Bắc là vùng than đá lớn nhất Việt Nam."},
+  {q:"Đường bờ biển nước ta có chiều dài khoảng bao nhiêu ki-lô-mét?",o:["2 360 km.","3 260 km.","4 500 km.","1 000 km."],a:1,ex:"Bờ biển Việt Nam dài khoảng 3.260 km kéo dài từ Móng Cái (Quảng Ninh) đến Hà Tiên (Kiên Giang)."},
+  {q:"Loại đất chiếm diện tích lớn nhất ở vùng đồi núi nước ta là:",o:["Đất phù sa.","Đất Fe-ra-lít.","Đất xám bạc màu.","Đất mùn núi cao."],a:1,ex:"Đất Feralit hình thành trên vùng đồi núi đá mẹ đa dạng, chiếm hơn 65% diện tích tự nhiên."},
+  {q:"Nước ta có nguồn tài nguyên khoáng sản phong phú là do:",o:["Nằm ở trung tâm Châu Á.","Nằm ở vị trí giao nhau giữa các vành đai sinh khoáng lớn.","Có nhiều đồng bằng rộng lớn.","Khí hậu nhiệt đới ẩm mưa nhiều."],a:1,ex:"Việt Nam nằm ở nơi giao nhau giữa vành đai sinh khoáng Thái Bình Dương và Địa Trung Hải."},
+]
+
+// 3. Công Nghệ 8 (Vẽ Kỹ Thuật) - 40 câu
+var CN=[
+  {q:"Theo tiêu chuẩn TCVN 7285:2003, khổ giấy A4 có kích thước là bao nhiêu?",o:["841 x 1189 mm.","594 x 841 mm.","297 x 420 mm.","210 x 297 mm."],a:3,ex:"Khổ giấy A4 tiêu chuẩn kỹ thuật có kích thước 210 mm x 297 mm."},
+  {q:"Loại nét vẽ nào sau đây được sử dụng để vẽ đường khung bản vẽ và đường khung tên?",o:["Nét liền mảnh.","Nét liền đậm.","Nét đứt mảnh.","Nét gạch chấm mảnh."],a:1,ex:"Nét liền đậm dùng để vẽ đường bao thấy, khung bản vẽ và khung tên."},
+  {q:"Tỉ lệ 1:2 ghi trên bản vẽ kỹ thuật thể hiện loại tỉ lệ nào?",o:["Tỉ lệ nguyên hình.","Tỉ lệ phóng to.","Tỉ lệ thu nhỏ.","Tỉ lệ tự do."],a:2,ex:"Tỉ lệ 1:2 có kích thước trên bản vẽ nhỏ hơn kích thước thực tế 2 lần nên gọi là tỉ lệ thu nhỏ."},
+  {q:"Trong phương pháp chiếu vuông góc, hướng chiếu từ trước vào mặt phẳng chiếu đứng cho ta hình chiếu nào?",o:["Hình chiếu đứng.","Hình chiếu bằng.","Hình chiếu cạnh.","Hình chiếu phối cảnh."],a:0,ex:"Hướng chiếu từ trước vuông góc với mặt phẳng chiếu đứng thu được Hình chiếu đứng."},
+  {q:"Trên bản vẽ kỹ thuật, hình chiếu bằng được bố trí ở vị trí nào so với hình chiếu đứng?",o:["Ở bên trái hình chiếu đứng.","Ở bên phải hình chiếu đứng.","Ở phía dưới hình chiếu đứng.","Ở phía trên hình chiếu đứng."],a:2,ex:"Quy tắc sắp xếp: Hình chiếu bằng nằm phía dưới hình chiếu đứng."},
+  {q:"Hình chiếu vuông góc của hình hộp chữ nhật theo hướng chiếu từ trước là hình gì?",o:["Hình tam giác.","Hình tròn.","Hình chữ nhật.","Hình thoi."],a:2,ex:"Nhìn từ trước vào khối hộp chữ nhật ta thu được hình biểu diễn mặt trước là hình chữ nhật."},
+  {q:"Khối tròn xoay nào được tạo thành khi quay một hình tam giác vuông quanh một cạnh góc vuông cố định?",o:["Hình trụ.","Hình nón.","Hình cầu.","Hình hộp."],a:1,ex:"Quay tam giác vuông quanh 1 cạnh góc vuông cố định sẽ quét thành khối nón tròn xoay."},
+  {q:"Hướng chiếu từ trái sang phải thu được hình chiếu nào sau đây?",o:["Hình chiếu đứng.","Hình chiếu bằng.","Hình chiếu cạnh.","Hình chiếu từ sau."],a:2,ex:"Hướng chiếu từ trái sang phải chiếu lên mặt phẳng chiếu cạnh cho ta hình chiếu cạnh (nằm bên phải hình chiếu đứng)."},
+  {q:"Hình chiếu vuông góc của hình cầu trên mọi mặt phẳng chiếu đều có dạng hình gì?",o:["Hình chữ nhật.","Hình tròn.","Hình tam giác.","Hình vuông."],a:1,ex:"Hình cầu đối xứng hoàn toàn qua tâm nên chiếu theo mọi hướng đều thu được hình tròn đường kính d."},
+  {q:"Phương pháp chiếu vuông góc sử dụng các tia chiếu có đặc điểm gì đối với mặt phẳng chiếu?",o:["Song song với mặt phẳng chiếu.","Song song với nhau và vuông góc với mặt phẳng chiếu.","Đồng quy tại một điểm trong không gian.","Xiên góc với mặt phẳng chiếu."],a:1,ex:"Phép chiếu vuông góc sử dụng chùm tia chiếu song song với nhau và vuông góc với mặt phẳng chiếu."},
+  {q:"Bản vẽ chi tiết gồm bao nhiêu nội dung chính?",o:["3 nội dung.","4 nội dung.","5 nội dung.","6 nội dung."],a:1,ex:"Bản vẽ chi tiết gồm 4 nội dung: 1. Khung tên, 2. Hình biểu diễn, 3. Kích thước, 4. Yêu cầu kỹ thuật."},
+  {q:"Nội dung nào sau đây KHÔNG có trên bản vẽ chi tiết?",o:["Khung tên.","Hình biểu diễn.","Bảng kê.","Yêu cầu kỹ thuật."],a:2,ex:"'Bảng kê' chỉ xuất hiện trên bản vẽ lắp (để liệt kê danh mục các chi tiết), không có ở bản vẽ chi tiết."},
+  {q:"Khung tên của bản vẽ chi tiết thường được đặt ở vị trí nào?",o:["Góc trên bên trái bản vẽ.","Góc trên bên phải bản vẽ.","Góc dưới bên trái bản vẽ.","Góc dưới bên phải bản vẽ."],a:3,ex:"Theo tiêu chuẩn trình bày, khung tên luôn đặt ở góc dưới bên phải trang giấy vẽ."},
+  {q:"Nội dung của khung tên bao gồm?",o:["Tên gọi, vật liệu và tỉ lệ của chi tiết.","Gia công và xử lý bề mặt chi tiết.","Số lượng và tỉ lệ vẽ chi tiết.","Danh mục các chi tiết trong bộ sản phẩm."],a:0,ex:"Khung tên chứa: tên gọi sản phẩm, vật liệu, tỉ lệ, tên người vẽ, người kiểm tra, cơ sở sản xuất..."},
+  {q:"Bản vẽ lắp được sử dụng chính vào mục đích gì trong kỹ thuật?",o:["Dùng để chế tạo một chi tiết máy duy nhất.","Dùng để lắp ráp, kiểm tra và vận hành sản phẩm gồm nhiều chi tiết.","Dùng để thi công xây dựng công trình nhà ở.","Dùng để tính toán giá thành nguyên vật liệu."],a:1,ex:"Bản vẽ lắp biểu diễn hình dạng và vị trí tương quan của các chi tiết dùng cho lắp ráp và kiểm tra."},
+  {q:"Nội dung nào sau đây có trên bản vẽ lắp nhưng KHÔNG xuất hiện trên bản vẽ chi tiết?",o:["Khung tên.","Bảng kê.","Kích thước.","Hình biểu diễn."],a:1,ex:"Bảng kê ghi danh sách các chi tiết cấu thành (tên, số lượng, vật liệu) chỉ có ở bản vẽ lắp."},
+  {q:"Phát biểu nào sau đây ĐÚNG về quy tắc ghi kích thước trên bản vẽ kỹ thuật?",o:["Đơn vị đo kích thước độ dài ghi trên bản vẽ mặc định là cm.","Chữ số kích thước được ghi phía dưới đường kích thước.","Đường dóng kích thước được vẽ bằng nét liền đậm.","Đơn vị đo độ dài mặc định là milimét (mm) và không cần ghi đơn vị sau chữ số kích thước."],a:3,ex:"Đơn vị độ dài mặc định trên bản vẽ kỹ thuật là milimét (mm) và không ghi chữ mm sau con số."},
+  {q:"Khi vẽ một chi tiết có chiều dài thực tế 100 mm lên giấy vẽ, chiều dài nét vẽ đo được là 200 mm, nhưng số ghi kích thước trên bản vẽ vẫn ghi 100 mm. Bản vẽ đó đang sử dụng tỉ lệ nào?",o:["Tỉ lệ 1:1.","Tỉ lệ 2:1.","Tỉ lệ 1:2.","Tỉ lệ 5:1."],a:1,ex:"Kích thước trên hình gấp 2 lần thực tế (200/100 = 2) nên tỉ lệ là 2:1 (ph phóng to). Con số kích thước ghi vẫn là thước thật 100."},
+  {q:"Tại sao khi biểu diễn hình chiếu vuông góc của các khối đa diện hoặc khối tròn xoay đơn giản, người ta thường chỉ cần dùng 2 hình chiếu?",o:["Vì hình chiếu thứ 3 trùng hoàn toàn với hình chiếu thứ 1.","Vì 2 hình chiếu đã đủ để xác định rõ hình dạng và kích thước ba chiều của vật thể.","Vì quy định tiêu chuẩn không cho phép vẽ 3 hình chiếu.","Vì để tiết kiệm diện tích trang giấy vẽ."],a:1,ex:"Các khối tròn xoay hoặc đối xứng có tính chất đặc thù nên 2 hình chiếu đã cung cấp đủ thông tin chiều dài, rộng, cao và đường kính."},
+  {q:"Hình chiếu đứng của một vật thể thể hiện những kích thước chiều nào của vật thể đó?",o:["Chiều dài và chiều rộng.","Chiều dài và chiều cao.","Chiều rộng và chiều cao.","Chỉ thể hiện chiều cao."],a:1,ex:"Hình chiếu đứng phản ánh kích thước Chiều dài và Chiều cao của vật thể."},
+  {q:"Cho một hình lăng trụ đứng đáy là tam giác đều đặt sao cho đáy song song với mặt phẳng chiếu bằng. Hình chiếu đứng của lăng trụ đó có dạng hình gì?",o:["Hình tam giác đều.","Hình chữ nhật.","Hình tròn.","Hình ngũ giác."],a:1,ex:"Khi đáy song song mặt phẳng chiếu bằng, hình chiếu đứng nhìn từ trước vào các mặt bên sẽ là các hình chữ nhật."},
+  {q:"Hình chiếu cạnh của một hình nón đặt đứng (đáy song song với mặt phẳng chiếu bằng) có dạng hình gì?",o:["Hình tròn.","Hình chữ nhật.","Hình tam giác cân.","Hình elip."],a:2,ex:"Chiếu từ trái sang một hình nón đứng thu được hình biểu diễn đường bao là hình tam giác cân."},
+  {q:"Điểm khác biệt căn bản giữa nét liền đậm và nét đứt mảnh khi biểu diễn vật thể trên bản vẽ là gì?",o:["Nét liền đậm vẽ đường kích thước, nét đứt mảnh vẽ đường trục.","Nét liền đậm vẽ đường bao thấy, nét đứt mảnh vẽ đường bao khuất.","Nét liền đậm vẽ đường tâm, nét đứt mảnh vẽ khung bản vẽ.","Nét liền đậm vẽ khung tên, nét đứt mảnh vẽ đường dóng."],a:1,ex:"Nét liền đậm vẽ các đường bao nhìn thấy; nét đứt mảnh vẽ các đường bao bị che khuất."},
+  {q:"Trình tự đọc bản vẽ chi tiết đúng quy chuẩn kỹ thuật là trình tự nào sau đây?",o:["1. Khung tên -> 2. Kích thước -> 3. Hình biểu diễn -> 4. Yêu cầu kỹ thuật","1. Khung tên -> 2. Hình biểu diễn -> 3. Kích thước -> 4. Yêu cầu kỹ thuật","1. Hình biểu diễn -> 2. Khung tên -> 3. Yêu cầu kỹ thuật -> 4. Kích thước","1. Yêu cầu kỹ thuật -> 2. Khung tên -> 3. Hình biểu diễn -> 4. Kích thước"],a:1,ex:"Trình tự đọc chuẩn: Khung tên -> Hình biểu diễn -> Kích thước -> Yêu cầu kỹ thuật -> Tổng hợp."},
+  {q:"Khi đọc bản vẽ chi tiết Gối đỡ, thông số chỉ dẫn 'Mạ kẽm' hoặc 'Làm tù cạnh' thuộc nội dung nào của bản vẽ?",o:["Khung tên.","Hình biểu diễn.","Kích thước.","Yêu cầu kỹ thuật."],a:3,ex:"Các yêu cầu xử lý bề mặt, gia công hoặc dung sai thuộc mục Yêu cầu kỹ thuật."},
+  {q:"Nội dung \"Yêu cầu kỹ thuật\" trên bản vẽ chi tiết cung cấp những chỉ dẫn quan trọng nào cho quá trình chế tạo?",o:["Tên gọi chi tiết, vật liệu chế tạo và tỉ lệ bản vẽ.","Các chỉ dẫn về phương pháp gia công và xử lý bề mặt chi tiết.","Danh mục tên gọi và số lượng các chi tiết cần lắp ráp.","Kích thước tổng thể chiều dài, chiều rộng và chiều cao của chi tiết."],a:1,ex:"Yêu cầu kỹ thuật gồm các chỉ dẫn xử lý nhiệt, mạ phủ, độ nhám bề mặt, dung sai..."},
+  {q:"Các kích thước ghi trên bản vẽ lắp thường bao gồm những nhóm kích thước nào?",o:["Kích thước chế tạo chi tiết của toàn bộ các chi tiết nhỏ.","Kích thước chung (chiều dài, rộng, cao của toàn bộ sản phẩm) và kích thước lắp ráp giữa các chi tiết.","Chỉ gồm kích thước chiều cao khung tên và bảng kê.","Chỉ gồm kích thước đường kính các bu lông và lỗ khoan."],a:1,ex:"Bản vẽ lắp ghi kích thước chung toàn bộ sản phẩm và các kích thước định vị/lắp ghép giữa các chi tiết."},
+  {q:"So sánh giữa bản vẽ chi tiết và bản vẽ lắp, điểm khác nhau cơ bản về mục đích sử dụng là gì?",o:["Bản vẽ chi tiết dùng để chế tạo, kiểm tra chi tiết; bản vẽ lắp dùng để lắp ráp, kiểm tra các chi tiết thành sản phẩm.","Bản vẽ chi tiết dùng trong thi công xây dựng; bản vẽ lắp dùng trong ngành dệt may.","Bản vẽ chi tiết bắt buộc vẽ bằng tay; bản vẽ lắp bắt buộc vẽ trên phần mềm vi tính.","Bản vẽ chi tiết có bảng kê; bản vẽ lắp có yêu cầu kỹ thuật."],a:0,ex:"Bản vẽ chi tiết dùng chế tạo 1 linh kiện độc lập; bản vẽ lắp dùng ghép nối các linh kiện thành sản phẩm hoàn chỉnh."},
+  {q:"Theo tiêu chuẩn TCVN 7285:2003, khổ giấy A3 có kích thước tiêu chuẩn là bao nhiêu?",o:["210 x 297 mm.","297 x 420 mm.","420 x 594 mm.","594 x 841 mm."],a:1,ex:"Khổ A3 gấp đôi khổ A4, kích thước là 297 mm x 420 mm."},
+  {q:"Để vẽ đường dóng kích thước và đường kích thước trên bản vẽ kỹ thuật, ta sử dụng nét vẽ nào?",o:["Nét liền đậm.","Nét liền mảnh.","Nét đứt mảnh.","Nét gạch chấm mảnh."],a:1,ex:"Nét liền mảnh được dùng để vẽ đường dóng kích thước, đường kích thước, đường gạch gạch mặt cắt."},
+  {q:"Khi biểu diễn một chi tiết siêu nhỏ trên bản vẽ, người ta dùng tỉ lệ 5:1. Tỉ lệ này thuộc loại tỉ lệ nào?",o:["Tỉ lệ thu nhỏ.","Tỉ lệ nguyên hình.","Tỉ lệ phóng to.","Tỉ lệ tự do."],a:2,ex:"Tỉ lệ 5:1 có kích thước nét vẽ gấp 5 lần kích thước thực tế nên là Tỉ lệ phóng to."},
+  {q:"Trên bản vẽ kỹ thuật tiêu chuẩn, hình chiếu cạnh được đặt ở vị trí nào so với hình chiếu đứng?",o:["Ở phía dưới hình chiếu đứng.","Ở phía trên hình chiếu đứng.","Ở bên phải hình chiếu đứng.","Ở bên trái hình chiếu đứng."],a:2,ex:"Theo vị trí các hình chiếu: Hình chiếu cạnh nằm ở bên phải hình chiếu đứng."},
+  {q:"Hình chiếu bằng của một hình lăng trụ đứng tam giác đều (đáy song song với mặt phẳng chiếu bằng) có dạng hình gì?",o:["Hình chữ nhật.","Hình tam giác đều.","Hình tròn.","Hình thoi."],a:1,ex:"Đáy song song mặt phẳng chiếu bằng nên khi chiếu vuông góc từ trên xuống sẽ thu được nguyên hình tam giác đều ở đáy."},
+  {q:"Khi quay một hình chữ nhật một vòng quanh một cạnh cố định, khối tròn xoay thu được là khối nào?",o:["Hình nón.","Hình cầu.","Hình trụ.","Hình nón cụt."],a:2,ex:"Quay hình chữ nhật quanh 1 cạnh cố định sẽ tạo thành khối trụ tròn xoay."},
+  {q:"Khi quay một hình bán nguyệt một vòng quanh đường kính cố định, khối tròn xoay thu được là khối nào?",o:["Hình trụ.","Hình cầu.","Hình nón.","Hình vành khăn."],a:1,ex:"Quay nửa hình tròn quanh đường kính cố định tạo ra khối cầu."},
+  {q:"Nội dung 'Hình biểu diễn' trên bản vẽ chi tiết cho người đọc biết thông tin gì?",o:["Vật liệu và tỉ lệ vẽ.","Hình dạng, cấu tạo của chi tiết.","Số lượng chi tiết cần làm.","Giá thành của chi tiết."],a:1,ex:"Hình biểu diễn gồm các hình chiếu, hình cắt... thể hiện hình dạng hình học và cấu tạo bên trong/ngoài chi tiết."},
+  {q:"Hình chiếu đứng của hình cầu là?",o:["Hình chữ nhật.","Hình tam giác.","Hình vuông.","Hình tròn."],a:3,ex:"Hình chiếu mọi hướng của hình cầu đều là hình tròn."},
+  {q:"Hình chiếu đứng, hình chiếu bằng, hình chiếu cạnh của vật thể hình trụ đặt đứng lần lượt là?",o:["Hình chữ nhật, hình tròn, hình chữ nhật.","Tam giác vuông, hình chữ nhật, hình chữ nhật.","Hình tròn, hình chữ nhật, hình chữ nhật.","Hình chữ nhật, hình tròn, hình tròn."],a:0,ex:"Khối trụ đứng chiếu từ trước: hình chữ nhật, chiếu từ trên: hình tròn, chiếu từ trái: hình chữ nhật."},
+  {q:"Đường trục, đường tâm của hình tròn, đường phân giác trên bản vẽ kỹ thuật được vẽ bằng nét gì?",o:["Nét liền đậm.","Nét đứt mảnh.","Nét gạch chấm mảnh.","Nét liền mảnh."],a:2,ex:"Nét gạch chấm mảnh dùng vẽ đường trục đối xứng, đường tâm tròn."},
+  {q:"Theo tiêu chuẩn TCVN 7285:2003, khổ giấy A1 có kích thước là bao nhiêu?",o:["841 x 1189 mm.","594 x 841 mm.","297 x 420 mm.","210 x 297 mm."],a:1,ex:"Khổ A1 có kích thước 594 mm x 841 mm (bằng một nửa khổ A0)."}
+];
+
+var letters=["A","B","C","D"];
+var SUBS={
+  khtn:{key:'khtn',name:'Khoa Học Tự Nhiên 8 (Hóa Học)',short:'KHTN 8 - Hóa',q:KHTN,color:'#16a34a'},
+  lsdl:{key:'lsdl',name:'Lịch Sử - Địa Lí 8',short:'LS-ĐL 8',q:LSD,color:'#b45309'},
+  cn:{key:'cn',name:'Công Nghệ 8 (Vẽ Kỹ Thuật)',short:'CN 8',q:CN,color:'#0d7a8a'}
+};
+
+var main=document.getElementById('main');
+var ME=null;
+var st={subject:null,idx:0,score:0,answers:[],saved:false,tab:'login',regAvatar:''};
+if(SESSION){ME=USERS.find(function(u){return u.id===SESSION;})||null;}
+
+function curUser(){return ME;}
+function setStatus(at,extra){if(!ME)return;ME.status=Object.assign({at:at,time:Date.now()},extra||{});saveUsers();}
+function avImg(u){return u&&u.avatar?u.avatar:'';}
+function avHtml(u,cls){cls=cls||'av';var img=avImg(u);return img?'<img class="'+cls+'" src="'+img+'">':'<div class="'+cls+'" style="display:inline-flex;align-items:center;justify-content:center;font-weight:700;color:#fff;background:var(--accent);font-size:16px;">'+(u?u.username.charAt(0).toUpperCase():'?')+'</div>';}
+function lbKey(k){return 'quiz_lb_'+k;}
+function getLB(k){return get(lbKey(k),[]);}
+function saveLB(k,userId,username,score,total){var d=getLB(k);d.push({userId:userId,username:username,score:score,total:total,pct:Math.round(score/total*100),date:new Date().toLocaleDateString('vi-VN')});set(lbKey(k),d.slice(-300));}
+function aggLB(k){var d=getLB(k),m={};d.forEach(function(e){var key=e.userId;if(!m[key]||e.pct>m[key].pct){m[key]={username:e.username,userId:e.userId,score:e.score,total:e.total,pct:e.pct,date:e.date,attempts:(m[key]?m[key].attempts:0)+1};}else{m[key].attempts++;}});var a=[];for(var x in m)a.push(m[x]);a.sort(function(a,b){return b.pct-a.pct||b.score-a.score;});return a;}
+function ago(t){var s=Math.floor((Date.now()-t)/1000);if(s<60)return s+' giây trước';if(s<3600)return Math.floor(s/60)+' phút trước';if(s<86400)return Math.floor(s/3600)+' giờ trước';return Math.floor(s/86400)+' ngày trước';}
+
+/* ===== AVATAR UPLOAD ===== */
+function handleAvatarFile(file,cb){if(!file)return;var rd=new FileReader();rd.onload=function(){var img=new Image();img.onload=function(){var c=document.createElement('canvas');c.width=96;c.height=96;var ctx=c.getContext('2d');var s=Math.min(img.width,img.height);var sx=(img.width-s)/2,sy=(img.height-s)/2;ctx.drawImage(img,sx,sy,s,s,0,0,96,96);cb(c.toDataURL('image/jpeg',0.7));};img.src=rd.result;};rd.readAsDataURL(file);}
+
+/* ===== SCREENS ===== */
+function renderAuth(){
+  applyTheme();setStatus('idle');
+  var t=st.tab;
+  main.innerHTML='<div class="card" style="padding:28px 22px;">'+
+    '<div style="text-align:center;margin-bottom:18px;"><div style="font-size:38px;">✎</div>'+
+    '<h1 style="font-size:24px;font-weight:700;margin:0;color:var(--text);">Quiz Luyện Thi Lớp 8</h1>'+
+    '<p style="font-size:13px;color:var(--muted);margin:4px 0 0;">Giữa kỳ I · 3 môn (KHTN Hóa, LS-ĐL, Công Nghệ)</p></div>'+
+    '<div style="display:flex;border-bottom:1.5px solid var(--border);margin-bottom:18px;">'+
+      '<div class="tab '+(t==='login'?'active':'')+'" data-tab="login" style="flex:1;text-align:center;">Đăng nhập</div>'+
+      '<div class="tab '+(t==='reg'?'active':'')+'" data-tab="reg" style="flex:1;text-align:center;">Đăng ký</div>'+
+      '<div class="tab '+(t==='admin'?'active':'')+'" data-tab="admin" style="flex:1;text-align:center;">Admin</div></div>'+
+    '<div id="authBody"></div></div>';
+  document.querySelectorAll('.tab').forEach(function(el){el.onclick=function(){st.tab=el.getAttribute('data-tab');renderAuth();};});
+  var b=document.getElementById('authBody');
+  if(t==='login'){
+    b.innerHTML='<label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">Tên đăng nhập</label>'+
+      '<input id="lu" type="text" style="width:100%;padding:12px 14px;border:2px solid var(--border);border-radius:12px;font-size:15px;margin-bottom:12px;outline:none;background:#fff;" placeholder="Nhập tên tài khoản">'+
+      '<label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">Mật khẩu</label>'+
+      '<input id="lp" type="password" style="width:100%;padding:12px 14px;border:2px solid var(--border);border-radius:12px;font-size:15px;margin-bottom:14px;outline:none;background:#fff;" placeholder="Nhập mật khẩu">'+
+      '<div id="lerr" style="color:#dc2626;font-size:13px;margin-bottom:10px;display:none;"></div>'+
+      '<button id="lbtn" class="btn" style="width:100%;background:var(--accent);color:#fff;border:none;padding:13px;border-radius:12px;font-size:15px;font-weight:600;font-family:inherit;">Đăng nhập</button>';
+    document.getElementById('lbtn').onclick=function(){
+      var u=document.getElementById('lu').value.trim(),p=document.getElementById('lp').value;
+      var found=USERS.find(function(x){return x.username.toLowerCase()===u.toLowerCase()&&x.password===p;});
+      if(!found){var e=document.getElementById('lerr');e.style.display='block';e.textContent='Sai tên đăng nhập hoặc mật khẩu!';return;}
+      ME=found;SESSION=found.id;set('quiz_session',SESSION);setStatus('menu');found.isAdmin?renderAdmin():renderHome();
+    };
+  } else if(t==='reg'){
+    b.innerHTML='<div style="text-align:center;margin-bottom:14px;">'+
+      '<div id="avPrev" style="width:72px;height:72px;border-radius:50%;background:var(--accent-soft);border:3px dashed var(--accent);margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--accent);cursor:pointer;" title="Chọn ảnh avatar">+</div>'+
+      '<input id="avFile" type="file" accept="image/*" capture="environment" style="display:none;">'+
+      '<button id="avPick" class="btn" style="background:var(--accent-soft);color:var(--accent);border:none;padding:6px 14px;border-radius:999px;font-size:12px;font-weight:600;font-family:inherit;">Chụp ảnh / Chọn từ bộ sưu tập</button></div>'+
+      '<label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">Tên đăng nhập</label>'+
+      '<input id="ru" type="text" style="width:100%;padding:12px 14px;border:2px solid var(--border);border-radius:12px;font-size:15px;margin-bottom:12px;outline:none;background:#fff;">'+
+      '<label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">Mật khẩu</label>'+
+      '<input id="rp" type="password" style="width:100%;padding:12px 14px;border:2px solid var(--border);border-radius:12px;font-size:15px;margin-bottom:14px;outline:none;background:#fff;">'+
+      '<div id="rerr" style="color:#dc2626;font-size:13px;margin-bottom:10px;display:none;"></div>'+
+      '<button id="rbtn" class="btn" style="width:100%;background:var(--accent);color:#fff;border:none;padding:13px;border-radius:12px;font-size:15px;font-weight:600;font-family:inherit;">Tạo tài khoản</button>';
+    st.regAvatar='';
+    function updAv(){var p=document.getElementById('avPrev');if(st.regAvatar){p.innerHTML='<img src="'+st.regAvatar+'" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">';p.style.border='3px solid var(--accent)';}else{p.innerHTML='+';}}
+    document.getElementById('avPick').onclick=function(){document.getElementById('avFile').click();};
+    document.getElementById('avPrev').onclick=function(){document.getElementById('avFile').click();};
+    document.getElementById('avFile').onchange=function(e){handleAvatarFile(e.target.files[0],function(d){st.regAvatar=d;updAv();});};
+    document.getElementById('rbtn').onclick=function(){
+      var u=document.getElementById('ru').value.trim(),p=document.getElementById('rp').value;
+      var err=document.getElementById('rerr');
+      if(!u||!p){err.style.display='block';err.textContent='Vui lòng nhập đủ tên và mật khẩu!';return;}
+      if(p.length<4){err.style.display='block';err.textContent='Mật khẩu tối thiểu 4 ký tự!';return;}
+      if(USERS.find(function(x){return x.username.toLowerCase()===u.toLowerCase();})){err.style.display='block';err.textContent='Tên đăng nhập đã tồn tại!';return;}
+      var nu={id:'u'+Date.now(),username:u,password:p,avatar:st.regAvatar,isAdmin:false,createdAt:Date.now(),status:{at:'menu',time:Date.now()},theme:'default'};
+      USERS.push(nu);saveUsers();ME=nu;SESSION=nu.id;set('quiz_session',SESSION);renderHome();
+    };
+  } else {
+    b.innerHTML='<label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">Mật khẩu Admin</label>'+
+      '<input id="apw" type="password" style="width:100%;padding:12px 14px;border:2px solid var(--border);border-radius:12px;font-size:15px;margin-bottom:14px;outline:none;background:#fff;" placeholder="Nhập mật khẩu admin">'+
+      '<div id="aerr" style="color:#dc2626;font-size:13px;margin-bottom:10px;display:none;"></div>'+
+      '<button id="abtn" class="btn" style="width:100%;background:var(--accent2);color:#fff;border:none;padding:13px;border-radius:12px;font-size:15px;font-weight:600;font-family:inherit;">Vào trang Admin</button>';
+    document.getElementById('abtn').onclick=function(){
+      if(document.getElementById('apw').value===ADMIN_PW){ME=USERS.find(function(u){return u.isAdmin;});SESSION=ME.id;set('quiz_session',SESSION);renderAdmin();}
+      else{var e=document.getElementById('aerr');e.style.display='block';e.textContent='Sai mật khẩu admin!';}
+    };
+  }
 }
-function aggregateLB(k){
-  var d=getLB(k), map={};
-  d.forEach(function(e){
-    var key=e.name.toLowerCase();
-    if(!map[key] || e.pct>map[key].pct){ map[key]={name:e.name,score:e.score,total:e.total,pct:e.pct,date:e.date,attempts:(map[key]?map[key].attempts:0)+1}; }
-    else { map[key].attempts++; }
+
+function renderHome(){
+  applyTheme();setStatus('menu');
+  main.innerHTML='<div class="card" style="padding:22px 18px;margin-bottom:14px;">'+
+    '<div style="display:flex;align-items:center;gap:14px;">'+
+    '<span id="myAvWrap" style="cursor:pointer;" title="Bấm vào avatar để đổi ảnh">'+avHtml(ME)+'</span>'+
+    '<input id="myAvFile" type="file" accept="image/*" style="display:none;">'+
+    '<div style="flex:1;min-width:0;"><div style="font-size:18px;font-weight:700;color:var(--text);">'+ME.username+'</div>'+
+    '<div style="font-size:12px;color:var(--muted);">Học sinh Lớp 8 · Sẵn sàng luyện thi</div></div>'+
+    '<button id="logout" class="btn" style="background:#fff;color:var(--muted);border:1.5px solid var(--border);padding:8px 14px;border-radius:10px;font-size:12px;font-weight:600;font-family:inherit;">Đăng xuất</button></div></div>'+
+    '<div class="card" style="padding:14px 16px;margin-bottom:14px;">'+
+    '<div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px;">Nền của tôi (chỉ hiện trên tài khoản '+ME.username+'):</div>'+
+    '<div id="myThemes" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;"></div></div>'+
+    
+    '<div class="card subject-card" data-sub="khtn" style="padding:20px;margin-bottom:12px;border-left:6px solid #16a34a;">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;"><div><h3 style="font-size:17px;font-weight:700;margin:0 0 3px;color:#16a34a;">🧪 Khoa Học Tự Nhiên 8 (Hóa Học)</h3><p style="font-size:12px;color:var(--muted);margin:0;">30 câu trắc nghiệm · Có giải thích chi tiết</p></div>'+
+      '<div style="font-size:28px;font-weight:700;color:#16a34a;">30</div></div></div>'+
+    
+    '<div class="card subject-card" data-sub="lsdl" style="padding:20px;margin-bottom:12px;border-left:6px solid #b45309;">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;"><div><h3 style="font-size:17px;font-weight:700;margin:0 0 3px;color:#b45309;">📜 Lịch Sử - Địa Lí 8</h3><p style="font-size:12px;color:var(--muted);margin:0;">20 câu trắc nghiệm · Lịch sử & Địa lý</p></div>'+
+      '<div style="font-size:28px;font-weight:700;color:#b45309;">20</div></div></div>'+
+    
+    '<div class="card subject-card" data-sub="cn" style="padding:20px;margin-bottom:14px;border-left:6px solid #0d7a8a;">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;"><div><h3 style="font-size:17px;font-weight:700;margin:0 0 3px;color:#0d7a8a;">📐 Công Nghệ 8 (Vẽ Kỹ Thuật)</h3><p style="font-size:12px;color:var(--muted);margin:0;">40 câu trắc nghiệm · Bản vẽ & Tiêu chuẩn</p></div>'+
+      '<div style="font-size:28px;font-weight:700;color:#0d7a8a;">40</div></div></div>'+
+    
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'+
+      '<button class="btn" id="btnSched" style="background:var(--card);color:var(--text);border:1.5px solid var(--border);padding:14px;border-radius:14px;font-size:14px;font-weight:600;font-family:inherit;">📅 Lịch thi</button>'+
+      '<button class="btn" id="btnLB" style="background:var(--card);color:var(--text);border:1.5px solid var(--border);padding:14px;border-radius:14px;font-size:14px;font-weight:600;font-family:inherit;">🏆 BXH</button></div>';
+  
+  document.querySelectorAll('.subject-card').forEach(function(el){el.onclick=function(){startQuiz(el.getAttribute('data-sub'));};});
+  document.getElementById('logout').onclick=function(){ME=null;SESSION=null;localStorage.removeItem('quiz_session');renderAuth();};
+  document.getElementById('btnSched').onclick=function(){renderSchedule(false);};
+  document.getElementById('btnLB').onclick=function(){renderLBMenu();};
+  document.getElementById('myAvWrap').onclick=function(){document.getElementById('myAvFile').click();};
+  document.getElementById('myAvFile').onchange=function(e){handleAvatarFile(e.target.files[0],function(d){ME.avatar=d;saveUsers();renderHome();});};
+  
+  var themeNames=[{k:'default',n:'Mặc định',c:'linear-gradient(135deg,#a8edea,#fed6e3)'},{k:'elsa',n:'Xanh băng',c:'linear-gradient(135deg,#e0f2fe,#bae6fd)'},{k:'kitty',n:'Hồng',c:'linear-gradient(135deg,#fce7f3,#fbcfe8)'},{k:'ocean',n:'Đêm dương',c:'linear-gradient(135deg,#0f2027,#2c5364)'},{k:'sunset',n:'Hoàng hôn',c:'linear-gradient(135deg,#ff9a9e,#fecfef)'}];
+  var tw=document.getElementById('myThemes');tw.innerHTML='';
+  themeNames.forEach(function(t){
+    var active=(ME.theme===t.k);
+    var sw=document.createElement('div');
+    sw.title=t.n;
+    sw.style.cssText='width:30px;height:30px;border-radius:50%;cursor:pointer;background:'+t.c+';border:3px solid #fff;box-shadow:0 0 0 '+(active?'2px var(--accent)':'1px var(--border)')+';flex-shrink:0;transition:transform .15s;';
+    sw.onmouseenter=function(){sw.style.transform='scale(1.12)';};
+    sw.onmouseleave=function(){sw.style.transform='scale(1)';};
+    sw.onclick=function(){ME.theme=t.k;ME.bgImg='';saveUsers();applyTheme();renderHome();};
+    tw.appendChild(sw);
   });
-  var arr=[]; for(var k2 in map) arr.push(map[k2]);
-  arr.sort(function(a,b){return b.pct-a.pct||b.score-a.score;});
-  return arr;
+  var up=document.createElement('div');
+  up.title='Tải ảnh nền tùy chỉnh';
+  up.style.cssText='width:30px;height:30px;border-radius:50%;cursor:pointer;background:#fff;border:2px dashed var(--accent);display:inline-flex;align-items:center;justify-content:center;color:var(--accent);font-size:16px;font-weight:700;flex-shrink:0;';
+  up.textContent='+';
+  up.onclick=function(){var inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.onchange=function(e){handleAvatarFile(e.target.files[0],function(d){ME.theme='image';ME.bgImg=d;saveUsers();applyTheme();renderHome();});};inp.click();};
+  tw.appendChild(up);
 }
 
-document.addEventListener('click',function(e){ if(e.target.closest('.btn,.opt,.subject-card,input[type=text]')){ tick(); } },true);
-
-/* ============ SCREENS ============ */
-function renderWelcome(){
-  applyTheme(HOME); state.saved=false;
-  var topLS=aggregateLB("lsdl"), topCN=aggregateLB("cn");
-  var lsTop=topLS.length>0?topLS[0].name+" ("+topLS[0].pct+"%)":"Chưa có";
-  var cnTop=topCN.length>0?topCN[0].name+" ("+topCN[0].pct+"%)":"Chưa có";
-  main.innerHTML='<div class="card" style="padding:36px 28px;text-align:center;">'+
-    '<div style="font-size:40px;margin-bottom:6px;">✎</div>'+
-    '<h1 style="font-size:26px;font-weight:700;margin:0 0 6px;line-height:1.25;">Chào mừng bạn!</h1>'+
-    '<p style="color:var(--muted);font-size:14px;margin:0 0 4px;">Luyện thi trắc nghiệm tương tác</p>'+
-    '<p style="color:var(--accent2);font-size:12px;margin:0 0 22px;font-weight:500;">2 môn: LS-ĐL (20 câu) · Công Nghệ (40 câu) · Bấm vào chuối vàng để xem nó nhảy!</p>'+
-    '<div style="max-width:340px;margin:0 auto 18px;text-align:left;">'+
-      '<label style="display:block;font-size:14px;font-weight:600;margin-bottom:8px;">Nhập tên của bạn:</label>'+
-      '<input id="nameInput" type="text" placeholder="VD: Nguyễn Văn A" value="'+state.name+'" style="width:100%;padding:14px 16px;border:2px solid var(--border);border-radius:14px;font-size:16px;outline:none;background:#fff;" onfocus="this.style.borderColor=\'var(--accent)\'" onblur="this.style.borderColor=\'var(--border)\'">'+
-    '</div>'+
-    '<button id="enterBtn" class="btn" style="background:var(--accent);color:#fff;border:none;padding:14px 44px;border-radius:14px;font-size:16px;font-weight:600;font-family:inherit;box-shadow:0 4px 14px rgba(41,122,46,.3);">Vào thi →</button>'+
-    '<div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--border);">'+
-      '<p style="font-size:12px;color:var(--muted);margin:0 0 12px;font-weight:600;">🏆 BẢNG XẾP HẠNG CÔNG KHAI</p>'+
-      '<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">'+
-        '<button class="btn" data-publb="lsdl" style="flex:1;min-width:150px;background:#fbf6ee;color:#b45309;border:2px solid #b45309;padding:11px;border-radius:12px;font-size:13px;font-weight:600;font-family:inherit;">BXH LS-ĐL<div style="font-size:11px;font-weight:500;opacity:.8;margin-top:2px;">#1: '+lsTop+'</div></button>'+
-        '<button class="btn" data-publb="cn" style="flex:1;min-width:150px;background:#eef5f7;color:#0d7a8a;border:2px solid #0d7a8a;padding:11px;border-radius:12px;font-size:13px;font-weight:600;font-family:inherit;">BXH Công Nghệ<div style="font-size:11px;font-weight:500;opacity:.8;margin-top:2px;">#1: '+cnTop+'</div></button>'+
-      '</div></div></div>';
-  var ni=document.getElementById("nameInput");
-  ni.addEventListener('keydown',function(e){if(e.key==='Enter'){enter();}});
-  document.getElementById("enterBtn").onclick=enter;
-  function enter(){ var v=ni.value.trim(); if(!v){ ni.style.borderColor="#dc2626"; ni.placeholder="Vui lòng nhập tên!"; return; } state.name=v.substring(0,30); renderMenu(); }
-  document.querySelectorAll("[data-publb]").forEach(function(el){ el.onclick=function(){ renderLeaderboard(el.getAttribute("data-publb"), true); }; });
+function renderLBMenu(){
+  applyTheme();
+  main.innerHTML='<div class="card" style="padding:22px 18px;">'+
+    '<h2 style="font-size:18px;font-weight:700;margin:0 0 14px;color:var(--text);">🏆 Chọn bảng xếp hạng</h2>'+
+    '<button class="btn" data-lb="khtn" style="width:100%;background:#eaf8ed;color:#16a34a;border:2px solid #16a34a;padding:14px;border-radius:14px;font-size:15px;font-weight:600;font-family:inherit;margin-bottom:10px;text-align:left;">🧪 BXH KHTN 8 (Hóa Học)</button>'+
+    '<button class="btn" data-lb="lsdl" style="width:100%;background:#fbf6ee;color:#b45309;border:2px solid #b45309;padding:14px;border-radius:14px;font-size:15px;font-weight:600;font-family:inherit;margin-bottom:10px;text-align:left;">📜 BXH Lịch Sử - Địa Lí</button>'+
+    '<button class="btn" data-lb="cn" style="width:100%;background:#eef5f7;color:#0d7a8a;border:2px solid #0d7a8a;padding:14px;border-radius:14px;font-size:15px;font-weight:600;font-family:inherit;margin-bottom:14px;text-align:left;">📐 BXH Công Nghệ</button>'+
+    '<button class="btn" id="back" style="width:100%;background:#fff;color:var(--muted);border:2px solid var(--border);padding:12px;border-radius:14px;font-size:14px;font-weight:600;font-family:inherit;">← Quay lại</button></div>';
+  document.querySelectorAll('[data-lb]').forEach(function(el){el.onclick=function(){renderLeaderboard(el.getAttribute('data-lb'));};});
+  document.getElementById('back').onclick=renderHome;
 }
 
-function renderMenu(){
-  applyTheme(HOME);
-  var lbLS=aggregateLB("lsdl"), lbCN=aggregateLB("cn");
-  var topLS=lbLS.length>0?lbLS[0].name+" ("+lbLS[0].pct+"%)":"Chưa có";
-  var topCN=lbCN.length>0?lbCN[0].name+" ("+lbCN[0].pct+"%)":"Chưa có";
-  main.innerHTML='<div>'+
-    '<div style="text-align:center;margin-bottom:22px;">'+
-      '<div style="display:inline-block;background:var(--accent-soft);color:var(--accent);padding:6px 16px;border-radius:999px;font-size:13px;font-weight:600;margin-bottom:10px;">Xin chào</div>'+
-      '<h1 style="font-size:26px;font-weight:700;margin:0 0 4px;">'+state.name+'</h1>'+
-      '<p style="color:var(--muted);font-size:14px;margin:0;">Chọn môn bạn muốn luyện tập</p></div>'+
-    '<div class="card subject-card" data-sub="lsdl" style="padding:22px;margin-bottom:14px;border-left:6px solid #b45309;">'+
-      '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;">'+
-        '<div><h3 style="font-size:18px;font-weight:700;margin:0 0 4px;color:#b45309;">Lịch Sử - Địa Lí 8</h3>'+
-        '<p style="font-size:13px;color:var(--muted);margin:0 0 8px;">20 câu · Giữa kỳ I</p>'+
-        '<span style="font-size:12px;background:#fbf6ee;color:#b45309;padding:4px 10px;border-radius:999px;font-weight:600;">🏆 #1: '+topLS+'</span></div>'+
-        '<div style="font-size:34px;font-weight:700;color:#b45309;">20</div></div></div>'+
-    '<div class="card subject-card" data-sub="cn" style="padding:22px;margin-bottom:18px;border-left:6px solid #0d7a8a;">'+
-      '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;">'+
-        '<div><h3 style="font-size:18px;font-weight:700;margin:0 0 4px;color:#0d7a8a;">Công Nghệ 8 (Vẽ Kỹ Thuật)</h3>'+
-        '<p style="font-size:13px;color:var(--muted);margin:0 0 8px;">40 câu · Giữa kỳ I</p>'+
-        '<span style="font-size:12px;background:#eef5f7;color:#0d7a8a;padding:4px 10px;border-radius:999px;font-weight:600;">🏆 #1: '+topCN+'</span></div>'+
-        '<div style="font-size:34px;font-weight:700;color:#0d7a8a;">40</div></div></div>'+
-    '<div style="display:flex;gap:10px;flex-wrap:wrap;">'+
-      '<button class="btn" data-lb="lsdl" style="flex:1;min-width:120px;background:#fff;color:#b45309;border:2px solid #b45309;padding:11px;border-radius:14px;font-size:13px;font-weight:600;font-family:inherit;">BXH LS-ĐL</button>'+
-      '<button class="btn" data-lb="cn" style="flex:1;min-width:120px;background:#fff;color:#0d7a8a;border:2px solid #0d7a8a;padding:11px;border-radius:14px;font-size:13px;font-weight:600;font-family:inherit;">BXH CN</button>'+
-      '<button class="btn" id="changeName" style="flex:1;min-width:120px;background:#fff;color:var(--muted);border:2px solid var(--border);padding:11px;border-radius:14px;font-size:13px;font-weight:600;font-family:inherit;">Đổi tên</button>'+
-    '</div></div>';
-  document.querySelectorAll(".subject-card").forEach(function(el){ el.onclick=function(){ startQuiz(el.getAttribute("data-sub")); }; });
-  document.querySelectorAll("[data-lb]").forEach(function(el){ el.onclick=function(){ renderLeaderboard(el.getAttribute("data-lb"), false); }; });
-  document.getElementById("changeName").onclick=function(){ renderWelcome(); };
+function renderLeaderboard(key){
+  applyTheme();
+  var sub=SUBS[key],lb=aggLB(key);
+  var rows=lb.length===0?'<div style="text-align:center;color:var(--muted);padding:24px;font-size:14px;">Chưa có lượt thi nào!</div>':'';
+  lb.slice(0,20).forEach(function(e,idx){
+    var medal=idx===0?'🥇':idx===1?'🥈':idx===2?'🥉':(idx+1)+'.';
+    var isMe=ME&&e.userId===ME.id?'border:2px solid var(--accent);background:var(--accent-soft);':'';
+    var u=USERS.find(function(x){return x.id===e.userId;});
+    rows+='<div class="lb-row" data-uid="'+e.userId+'" style="cursor:pointer;'+isMe+'"><div style="display:flex;align-items:center;gap:10px;min-width:0;">'+
+      '<span style="font-weight:700;width:26px;text-align:center;flex-shrink:0;">'+medal+'</span>'+
+      (u?avHtml(u,'av-sm'):'<div class="av-sm"></div>')+
+      '<div style="min-width:0;"><div style="font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px;color:var(--text);">'+e.username+'</div>'+
+      '<div style="font-size:11px;color:var(--muted);">Thi '+e.attempts+' lần</div></div></div>'+
+      '<div style="text-align:right;flex-shrink:0;"><div style="font-weight:700;color:var(--accent);font-size:15px;">'+e.score+'/'+e.total+'</div>'+
+      '<div style="font-size:11px;color:var(--muted);font-weight:600;">'+e.pct+'%</div></div></div>';
+  });
+  main.innerHTML='<div class="card" style="padding:20px 16px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">'+
+    '<h2 style="font-size:17px;font-weight:700;margin:0;color:var(--text);">🏆 BXH '+sub.short+'</h2>'+
+    '<button class="btn" id="back" style="background:#fff;color:var(--muted);border:1.5px solid var(--border);padding:7px 12px;border-radius:10px;font-size:12px;font-weight:600;font-family:inherit;">← Quay lại</button></div>'+rows+'</div>';
+  document.getElementById('back').onclick=renderLBMenu;
+  document.querySelectorAll('[data-uid]').forEach(function(el){el.onclick=function(e){e.stopPropagation();viewUser(el.getAttribute('data-uid'));};});
+}
+
+function renderSchedule(isAdmin){
+  applyTheme();
+  var rows='';
+  if(SCHEDULE.length===0)rows='<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px;">Chưa có lịch thi nào.</div>';
+  SCHEDULE.forEach(function(s){
+    rows+='<div style="padding:12px 14px;border-radius:12px;margin-bottom:10px;background:var(--accent-soft);border-left:4px solid var(--accent);">'+
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">'+
+      '<div style="flex:1;"><div style="font-size:12px;font-weight:700;color:var(--accent);">📅 '+s.date+'</div>'+
+      '<div style="font-size:14px;font-weight:600;color:var(--text);margin:2px 0;">'+s.title+'</div>'+
+      (s.note?'<div style="font-size:12px;color:var(--muted);">'+s.note+'</div>':'')+'</div>'+
+      (isAdmin?'<button class="btn" data-del="'+s.id+'" style="background:#dc2626;color:#fff;border:none;padding:5px 10px;border-radius:8px;font-size:11px;font-weight:600;font-family:inherit;flex-shrink:0;">Xóa</button>':'')+
+      '</div></div>';
+  });
+  var addForm=isAdmin?'<div style="margin-top:14px;padding:14px;border:1.5px dashed var(--border);border-radius:12px;">'+
+    '<div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text);">Thêm lịch thi mới</div>'+
+    '<input id="sd" type="text" placeholder="Ngày (VD: 10/11/2026)" style="width:100%;padding:9px 12px;border:2px solid var(--border);border-radius:10px;font-size:13px;margin-bottom:8px;outline:none;background:#fff;">'+
+    '<input id="st" type="text" placeholder="Tên kỳ thi" style="width:100%;padding:9px 12px;border:2px solid var(--border);border-radius:10px;font-size:13px;margin-bottom:8px;outline:none;background:#fff;">'+
+    '<input id="sn" type="text" placeholder="Ghi chú (không bắt buộc)" style="width:100%;padding:9px 12px;border:2px solid var(--border);border-radius:10px;font-size:13px;margin-bottom:10px;outline:none;background:#fff;">'+
+    '<button class="btn" id="addS" style="width:100%;background:var(--accent);color:#fff;border:none;padding:10px;border-radius:10px;font-size:13px;font-weight:600;font-family:inherit;">+ Thêm lịch thi</button></div>':'';
+  main.innerHTML='<div class="card" style="padding:20px 16px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">'+
+    '<h2 style="font-size:17px;font-weight:700;margin:0;color:var(--text);">📅 Lịch thi</h2>'+
+    '<button class="btn" id="back" style="background:#fff;color:var(--muted);border:1.5px solid var(--border);padding:7px 12px;border-radius:10px;font-size:12px;font-weight:600;font-family:inherit;">← Quay lại</button></div>'+rows+addForm+'</div>';
+  document.getElementById('back').onclick=function(){isAdmin?renderAdmin():renderHome();};
+  if(isAdmin){
+    document.querySelectorAll('[data-del]').forEach(function(el){el.onclick=function(){SCHEDULE=SCHEDULE.filter(function(s){return s.id!=el.getAttribute('data-del');});set('quiz_schedule',SCHEDULE);renderSchedule(true);};});
+    document.getElementById('addS').onclick=function(){
+      var d=document.getElementById('sd').value.trim(),t=document.getElementById('st').value.trim(),n=document.getElementById('sn').value.trim();
+      if(!d||!t)return;
+      SCHEDULE.push({id:Date.now(),date:d,title:t,note:n});set('quiz_schedule',SCHEDULE);renderSchedule(true);
+    };
+  }
 }
 
 function startQuiz(key){
-  state.subject=SUBJECTS[key]; state.idx=0; state.score=0; state.saved=false; state.answers=[];
-  for(var i=0;i<state.subject.q.length;i++) state.answers.push(null);
+  st.subject=SUBS[key];st.idx=0;st.score=0;st.saved=false;st.answers=[];
+  for(var i=0;i<st.subject.q.length;i++)st.answers.push(null);
   renderQuiz();
 }
 
+/* ===== QUIZ ENGINE VỚI GIẢI THÍCH CHI TIẾT NGAY KHI CHỌN ===== */
 function renderQuiz(){
-  var sub=state.subject; applyTheme(sub);
-  var i=state.idx, item=sub.q[i];
-  var pct=Math.round((i/sub.q.length)*100);
-  var answered=state.answers[i]!==null;
-  var optsHtml="";
+  applyTheme();
+  var sub=st.subject,i=st.idx,item=sub.q[i];
+  setStatus('quiz',{subject:sub.short,qIndex:i+1,total:sub.q.length});
+  var pct=Math.round((i)/sub.q.length*100),answered=st.answers[i]!==null;
+  var opts='';
   for(var k=0;k<4;k++){
-    var extra="";
-    if(answered){ if(k===item.a) extra=" correct"; else if(k===state.answers[i].chosen) extra=" wrong"; else extra=" dim"; }
-    optsHtml+='<div class="opt'+extra+(answered?" locked":"")+'" data-i="'+k+'" style="display:flex;align-items:flex-start;gap:12px;padding:13px 15px;border-radius:14px;margin-bottom:10px;">'+
-      '<span class="badge" style="background:var(--bg);border:1.5px solid var(--border);color:var(--muted);font-size:14px;">'+letters[k]+'</span>'+
-      '<span style="font-size:15px;line-height:1.5;padding-top:4px;">'+item.o[k]+'</span></div>';
+    var ex='';if(answered){if(k===item.a)ex=' correct';else if(k===st.answers[i].chosen)ex=' wrong';else ex=' dim';}
+    opts+='<div class="opt'+ex+(answered?' locked':'')+'" data-i="'+k+'" style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:12px;margin-bottom:8px;">'+
+      '<span class="badge" style="background:var(--accent-soft);color:var(--accent);font-size:13px;">'+letters[k]+'</span>'+
+      '<span style="font-size:14px;line-height:1.5;padding-top:3px;color:var(--text);">'+item.o[k]+'</span></div>';
   }
-  var fbHtml="";
-  if(answered){ var ok=state.answers[i].ok;
-    fbHtml='<div style="margin-top:6px;margin-bottom:14px;padding:12px 16px;border-radius:12px;font-size:14px;font-weight:500;line-height:1.5;background:'+(ok?"var(--accent-soft)":"var(--wrong-soft)")+';color:'+(ok?"var(--accent)":"var(--wrong)")+';">'+
-      (ok?'<span style="font-weight:700;">Chính xác!</span> Đáp án đúng là '+letters[item.a]+'.':'<span style="font-weight:700;">Chưa đúng.</span> Đáp án đúng là <b>'+letters[item.a]+'</b>: '+item.o[item.a])+'</div>';
+  
+  var fb='';
+  if(answered){
+    var ok=st.answers[i].ok;
+    fb='<div style="margin:10px 0 14px;padding:12px 14px;border-radius:12px;font-size:13px;line-height:1.5;background:'+(ok?'var(--accent-soft)':'rgba(220,38,38,.08)')+';border:1.5px solid '+(ok?'var(--accent)':'#dc2626')+';">'+
+      '<div style="font-weight:700;color:'+(ok?'var(--accent)':'#dc2626')+';margin-bottom:4px;display:flex;align-items:center;gap:6px;">'+
+        '<span>'+(ok?'✓ CHÍNH XÁC!':'✗ CHƯA ĐÚNG!')+'</span>'+
+        '<span>(Đáp án đúng: '+letters[item.a]+')</span>'+
+      '</div>'+
+      '<div style="color:var(--text);font-size:13px;background:rgba(255,255,255,.6);padding:8px 10px;border-radius:8px;margin-top:6px;border-left:3px solid '+(ok?'var(--accent)':'#dc2626')+';">'+
+        '💡 <b>Giải thích chi tiết:</b> '+item.ex+
+      '</div>'+
+    '</div>';
   }
-  var nextLabel=(i===sub.q.length-1)?"Hoàn thành & Xem kết quả":"Câu tiếp theo";
-  var nav='<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:16px;">';
+  
+  var nav='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:14px;">';
   for(var j=0;j<sub.q.length;j++){
-    var c="";
-    if(state.answers[j]!==null) c+= state.answers[j].ok?"background:var(--accent);color:#fff;border-color:var(--accent);":"background:var(--wrong);color:#fff;border-color:var(--wrong);";
-    if(j===i) c+="box-shadow:0 0 0 2px var(--accent2-soft);border-color:var(--accent2);";
-    nav+='<span data-jump="'+j+'" style="width:26px;height:26px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:#fff;'+c+'">'+(j+1)+'</span>';
+    var c='';
+    if(st.answers[j]!==null)c+=st.answers[j].ok?'background:var(--accent);color:#fff;border-color:var(--accent);':'background:#dc2626;color:#fff;border-color:#dc2626;';
+    if(j===i)c+='box-shadow:0 0 0 2.5px var(--accent2);';
+    nav+='<span data-jump="'+j+'" style="width:24px;height:24px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:#fff;color:var(--text);'+c+'">'+(j+1)+'</span>';
   }
   nav+='</div>';
-  main.innerHTML='<div class="card" style="padding:22px 18px;">'+
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">'+
-      '<span style="font-size:12px;font-weight:600;color:#fff;background:var(--accent);padding:4px 12px;border-radius:999px;">'+sub.short+'</span>'+
-      '<span style="font-size:13px;font-weight:600;color:var(--muted);">Câu '+(i+1)+' / '+sub.q.length+'</span>'+
-      '<span style="font-size:12px;font-weight:600;color:var(--accent);">Đúng: '+state.score+'</span></div>'+
-    '<div style="height:8px;background:var(--bg);border-radius:999px;overflow:hidden;margin-bottom:18px;"><div class="progress-fill" style="height:100%;width:'+pct+'%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:999px;"></div></div>'+
-    '<h2 style="font-size:17px;font-weight:600;margin:0 0 16px;line-height:1.5;">'+item.q+'</h2>'+
-    '<div id="opts">'+optsHtml+'</div>'+fbHtml+
-    '<div style="display:flex;gap:10px;margin-top:6px;">'+
-      '<button id="quitBtn" class="btn" style="flex:1;background:#fff;color:var(--muted);border:1.5px solid var(--border);padding:12px;border-radius:14px;font-size:13px;font-weight:600;font-family:inherit;">Thoát</button>'+
-      (i>0?'<button id="prevBtn" class="btn" style="flex:1;background:var(--bg);color:var(--text);border:1.5px solid var(--border);padding:12px;border-radius:14px;font-size:14px;font-weight:600;font-family:inherit;">Trước</button>':'')+
-      '<button id="nextBtn" class="btn" style="flex:2;background:'+(answered?"var(--accent)":"#e2e8f0")+';color:'+(answered?"#fff":"#94a3b8")+';border:none;padding:12px;border-radius:14px;font-size:14px;font-weight:600;font-family:inherit;" '+(answered?"":"disabled")+'>'+nextLabel+'</button></div>'+
-    nav+'</div>';
+  
+  main.innerHTML='<div class="card" style="padding:20px 16px;">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;">'+
+      '<span style="font-size:11px;font-weight:700;color:#fff;background:'+(sub.color||'var(--accent)')+';padding:4px 12px;border-radius:999px;">'+sub.short+'</span>'+
+      '<span style="font-size:12px;font-weight:600;color:var(--muted);">Câu '+(i+1)+'/'+sub.q.length+'</span>'+
+      '<span style="font-size:11px;font-weight:700;color:var(--accent);">Đúng: '+st.score+'</span></div>'+
+    '<div style="height:6px;background:rgba(128,128,128,.15);border-radius:999px;overflow:hidden;margin-bottom:16px;"><div class="progress-fill" style="height:100%;width:'+pct+'%;background:'+(sub.color||'var(--accent)')+';border-radius:999px;"></div></div>'+
+    '<h2 style="font-size:16px;font-weight:600;margin:0 0 14px;line-height:1.5;color:var(--text);">'+item.q+'</h2>'+
+    '<div id="opts">'+opts+'</div>'+fb+
+    '<div style="display:flex;gap:8px;margin-top:4px;">'+
+      '<button id="quit" class="btn" style="flex:1;background:#fff;color:var(--muted);border:1.5px solid var(--border);padding:11px;border-radius:12px;font-size:13px;font-weight:600;font-family:inherit;">Thoát</button>'+
+      (i>0?'<button id="prev" class="btn" style="flex:1;background:rgba(128,128,128,.1);color:var(--text);border:1.5px solid var(--border);padding:11px;border-radius:12px;font-size:13px;font-weight:600;font-family:inherit;">Trước</button>':'')+
+      '<button id="next" class="btn" style="flex:2;background:'+(answered?'var(--accent)':'#cbd5e1')+';color:'+(answered?'#fff':'#64748b')+';border:none;padding:11px;border-radius:12px;font-size:14px;font-weight:600;font-family:inherit;" '+(answered?'':'disabled')+'>'+(i===sub.q.length-1?'Hoàn thành':'Câu tiếp theo')+'</button></div>'+nav+'</div>';
+  
   if(!answered){
-    document.querySelectorAll(".opt").forEach(function(el){
+    document.querySelectorAll('.opt').forEach(function(el){
       el.onclick=function(){
-        var chosen=parseInt(el.getAttribute("data-i"));
-        var ok=(chosen===item.a);
-        state.answers[i]={ok:ok,chosen:chosen};
-        if(ok){state.score++;okSound();}else{noSound();}
+        var ch=parseInt(el.getAttribute('data-i'));
+        var ok=ch===item.a;
+        st.answers[i]={ok:ok,chosen:ch};
+        if(ok){st.score++;okS();}else noS();
         renderQuiz();
       };
     });
   }
-  document.getElementById("nextBtn").onclick=function(){ if(i===sub.q.length-1){ renderResult(); } else { state.idx++; renderQuiz(); } };
-  var pb=document.getElementById("prevBtn"); if(pb) pb.onclick=function(){state.idx--;renderQuiz();};
-  document.getElementById("quitBtn").onclick=function(){ renderMenu(); };
-  document.querySelectorAll("[data-jump]").forEach(function(el){ el.onclick=function(){state.idx=parseInt(el.getAttribute("data-jump"));renderQuiz();}; });
+  document.getElementById('next').onclick=function(){if(i===sub.q.length-1)renderResult();else{st.idx++;renderQuiz();}};
+  var pv=document.getElementById('prev');if(pv)pv.onclick=function(){st.idx--;renderQuiz();};
+  document.getElementById('quit').onclick=function(){setStatus('menu');renderHome();};
+  document.querySelectorAll('[data-jump]').forEach(function(el){el.onclick=function(){st.idx=parseInt(el.getAttribute('data-jump'));renderQuiz();};});
+}
+
+/* ===== TÍNH NĂNG ĐÁNH GIÁ ƯU - NHƯỢC ĐIỂM BÀI LÀM ===== */
+function generateEvaluation(key, score, total, pct) {
+  var good = [], bad = [], advice = "";
+  
+  if (key === 'khtn') {
+    if (pct >= 90) {
+      good = [
+        "Nắm cực kỳ chắc kiến thức nền tảng Hóa học 8 (định nghĩa Mol, nồng độ dung dịch, tỉ khối).",
+        "Kỹ năng tính toán theo Phương trình hóa học và Bảo toàn khối lượng tuyệt vời.",
+        "Phân biệt hoàn hảo các loại hợp chất vô cơ (Acid, Base, Oxide, Muối)."
+      ];
+      bad = ["Thỉnh thoảng cần chú ý đọc kỹ đơn vị thể tích (m³ vs lít) hoặc điều kiện chuẩn (đkc)."];
+      advice = "Bạn sẵn sàng bứt phá các bài tập Hóa học nâng cao và đạt điểm 10 kỳ thi Giữa Kỳ I!";
+    } else if (pct >= 70) {
+      good = [
+        "Hiểu và áp dụng đúng các công thức tính số mol, khối lượng mol và thể tích khí.",
+        "Nhận biết tốt hiện tượng vật lý vs hiện tượng hóa học."
+      ];
+      bad = [
+        "Cần ôn tập kỹ hơn về tính chất hóa học riêng của từng loại Oxide (Oxide lưỡng tính như Al2O3, ZnO).",
+        "Coi lại công thức tính độ tan S và nồng độ phần trăm C% / nồng độ mol CM."
+      ];
+      advice = "Hãy luyện thêm 5-10 bài tập tính toán nồng độ dung dịch để nâng điểm tối đa.";
+    } else if (pct >= 50) {
+      good = ["Nhớ được một số khái niệm cơ bản như thang pH, ký hiệu hóa học và phản ứng cháy."];
+      bad = [
+        "Hay nhầm lẫn giữa định luật bảo toàn khối lượng và cách lập phương trình hóa học.",
+        "Chưa làm chủ phương pháp chuyển đổi giữa gam, mol và thể tích khí đkc."
+      ];
+      advice = "Xem lại bảng hóa trị và viết lại các phương trình hóa học quan trọng trong SGK KHTN 8.";
+    } else {
+      good = ["Có tinh thần học hỏi và nỗ lực hoàn thành bài thi."];
+      bad = [
+        "Hổng kiến thức cơ bản về Mol, công thức hóa học và dãy hoạt động kim loại.",
+        "Tính toán khối lượng và phân biệt tính chất hóa học chưa chính xác."
+      ];
+      advice = "Nên hệ thống lại lý thuyết Hóa 8 chương 1 & 2 từ đầu, ghi chép lại các công thức tính mol cơ bản!";
+    }
+  } else if (key === 'lsdl') {
+    if (pct >= 90) {
+      good = ["Nhớ chính xác các mốc sự kiện Lịch sử thế giới & Việt Nam thế kỷ XVII-XVIII.", "Nắm vững đặc điểm địa hình, tọa độ cực và tài nguyên khoáng sản Việt Nam."];
+      bad ["Chú ý học thêm phần phân tích nguyên nhân sâu xa của các cuộc cách mạng tư sản."];
+      advice = "Phong độ xuất sắc! Tiếp tục duy trì để đạt điểm tuyệt đối môn Lịch sử - Địa lý.";
+    } else if (pct >= 70) {
+      good = ["Nắm tốt vị trí địa lý, tọa độ các điểm cực phần đất liền Việt Nam.", "Nhớ các sự kiện lớn thời chúa Nguyễn và khởi nghĩa nông dân Đàng Ngoài."];
+      bad = ["Đôi lúc nhầm lẫn các mốc năm phát minh trong Cách mạng công nghiệp."];
+      advice = "Đọc lại các mốc thời gian trọng tâm trong bảng niên biểu Lịch sử 8.";
+    } else {
+      good = ["Biết được các kiến thức địa lý đồi núi và bờ biển Việt Nam."];
+      bad = ["Chưa nhớ kĩ vị trí ranh giới lịch sử và các sự kiện Cách mạng tư sản Pháp/Anh."];
+      advice = "Dùng sơ đồ tư duy để ôn tập lại kiến thức 2 phần Lịch sử và Địa lý.";
+    }
+  } else { // Công Nghệ
+    if (pct >= 90) {
+      good = ["Đọc bản vẽ kỹ thuật rất thành thạo.", "Nắm thuộc lòng các tiêu chuẩn khổ giấy (A4, A3, A1) và quy tắc ghi kích thước."];
+      bad = ["Rèn luyện thêm khả năng tư duy không gian với các hình khối phức tạp."];
+      advice = "Kiến thức Vẽ kỹ thuật của bạn rất tốt, hãy giữ vững phong độ này!";
+    } else if (pct >= 70) {
+      good = ["Hiểu rõ quy tắc 3 hình chiếu vuông góc và vị trí sắp xếp trên bản vẽ."];
+      bad = ["Cần chú ý phân biệt rõ nội dung giữa Bản vẽ chi tiết và Bản vẽ lắp (bảng kê vs yêu cầu kỹ thuật)."];
+      advice = "Xem lại quy chuẩn nét vẽ (nét liền đậm, nét đứt, nét gạch chấm mảnh).";
+    } else {
+      good = ["Nhận biết được một số hình chiếu của khối tròn xoay đơn giản."];
+      bad = ["Hay nhầm lẫn vị trí hình chiếu cạnh, hình chiếu bằng và tỉ lệ bản vẽ."];
+      advice = "Tập thực hành vẽ lại các hình chiếu vuông góc trong sách bài tập Công Nghệ 8.";
+    }
+  }
+
+  return {good: good, bad: bad, advice: advice};
 }
 
 function renderResult(){
-  var sub=state.subject; applyTheme(sub);
-  if(!state.saved){ saveLB(sub.key,state.name,state.score,sub.q.length); state.saved=true; winSound(); }
-  var sc=state.score,total=sub.q.length,pct=Math.round(sc/total*100);
-  var msg,color;
-  if(pct>=90){msg="Xuất sắc!";color="var(--accent)";}else if(pct>=70){msg="Khá tốt!";color="var(--accent)";}else if(pct>=50){msg="Cần ôn thêm!";color="var(--accent2)";}else{msg="Cần cố gắng hơn!";color="var(--wrong)";}
-  var lb=aggregateLB(sub.key); var rank=0;
-  for(var r=0;r<lb.length;r++){ if(lb[r].name.toLowerCase()===state.name.toLowerCase()){ rank=r+1; break; } }
-  var circle=2*Math.PI*52;
-  var wrongList="",wc=0;
-  state.answers.forEach(function(a,idx){
-    if(a&&!a.ok){ wc++; var it=sub.q[idx];
-      wrongList+='<div style="padding:10px 14px;border:1px solid var(--border);border-radius:12px;margin-bottom:8px;background:var(--bg);">'+
-        '<div style="font-size:12px;font-weight:600;color:var(--wrong);margin-bottom:3px;">Câu '+(idx+1)+' · Bạn chọn '+letters[a.chosen]+'</div>'+
-        '<div style="font-size:13px;line-height:1.5;margin-bottom:4px;">'+it.q+'</div>'+
-        '<div style="font-size:12px;color:var(--accent);font-weight:500;">Đúng: '+letters[it.a]+'. '+it.o[it.a]+'</div></div>';
+  applyTheme();setStatus('menu');
+  var sub=st.subject,sc=st.score,total=sub.q.length,pct=Math.round(sc/total*100);
+  if(!st.saved){saveLB(sub.key,ME.id,ME.username,sc,total);st.saved=true;winS();}
+  var msg=pct>=90?'Xuất sắc!':pct>=70?'Khá tốt!':pct>=50?'Cần ôn thêm!':'Cần cố gắng hơn!';
+  var color=pct>=70?'var(--accent)':pct>=50?'var(--accent2)':'#dc2626';
+  
+  var evalRes = generateEvaluation(sub.key, sc, total, pct);
+  
+  var goodHtml = evalRes.good.map(function(g){ return '<li style="margin-bottom:4px;">'+g+'</li>'; }).join('');
+  var badHtml = evalRes.bad.map(function(b){ return '<li style="margin-bottom:4px;">'+b+'</li>'; }).join('');
+
+  var wc=0,wl='';
+  st.answers.forEach(function(a,idx){
+    if(a&&!a.ok){
+      wc++;
+      var it=sub.q[idx];
+      wl+='<div style="padding:10px 12px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;background:rgba(128,128,128,.04);text-align:left;">'+
+        '<div style="font-size:12px;font-weight:700;color:#dc2626;margin-bottom:3px;">Câu '+(idx+1)+' · Bạn chọn: '+letters[a.chosen]+'</div>'+
+        '<div style="font-size:13px;line-height:1.4;color:var(--text);margin-bottom:4px;font-weight:600;">'+it.q+'</div>'+
+        '<div style="font-size:12px;color:var(--accent);font-weight:600;margin-bottom:4px;">Đúng: '+letters[it.a]+'. '+it.o[it.a]+'</div>'+
+        '<div style="font-size:11px;color:var(--muted);background:#fff;padding:6px 8px;border-radius:6px;border:1px solid var(--border);">💡 '+it.ex+'</div>'+
+      '</div>';
     }
   });
-  if(wc===0) wrongList='<div style="text-align:center;color:var(--accent);font-weight:600;padding:16px;">Bạn đã làm đúng toàn bộ '+total+' câu!</div>';
-  main.innerHTML='<div class="card" style="padding:26px 20px;text-align:center;margin-bottom:14px;">'+
-    '<div style="display:inline-block;background:var(--accent-soft);color:var(--accent);padding:5px 14px;border-radius:999px;font-size:12px;font-weight:600;margin-bottom:12px;">'+sub.name+'</div>'+
-    '<h2 style="font-size:19px;font-weight:700;margin:0 0 14px;">Kết quả của '+state.name+'</h2>'+
-    '<div style="position:relative;width:130px;height:130px;margin:0 auto 12px;">'+
-      '<svg width="130" height="130" viewBox="0 0 140 140"><circle cx="70" cy="70" r="52" fill="none" stroke="var(--bg)" stroke-width="12"/><circle cx="70" cy="70" r="52" fill="none" stroke="'+color+'" stroke-width="12" stroke-linecap="round" stroke-dasharray="'+circle+'" stroke-dashoffset="'+(circle*(1-pct/100))+'" transform="rotate(-90 70 70)"/></svg>'+
-      '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;"><div style="font-size:28px;font-weight:700;color:'+color+';">'+sc+'/'+total+'</div><div style="font-size:12px;color:var(--muted);">'+pct+'%</div></div></div>'+
-    '<div style="font-size:16px;font-weight:600;color:'+color+';margin-bottom:4px;">'+msg+'</div>'+
-    '<div style="font-size:13px;color:var(--muted);margin-bottom:4px;">Đúng '+sc+' · Sai '+(total-sc)+(rank>0?' · Hạng #'+rank+' / '+lb.length+' người':'')+'</div>'+
-    '<div style="font-size:12px;color:var(--accent);font-weight:600;margin-bottom:18px;">✓ Đã lưu công khai vào BXH</div>'+
-    '<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">'+
-      '<button class="btn" id="retryBtn" style="background:var(--accent);color:#fff;border:none;padding:11px 22px;border-radius:14px;font-size:13px;font-weight:600;font-family:inherit;">Làm lại</button>'+
-      '<button class="btn" id="lbBtn" style="background:#fff;color:var(--accent);border:2px solid var(--accent);padding:11px 22px;border-radius:14px;font-size:13px;font-weight:600;font-family:inherit;">Xem BXH</button>'+
-      '<button class="btn" id="menuBtn" style="background:#fff;color:var(--muted);border:2px solid var(--border);padding:11px 22px;border-radius:14px;font-size:13px;font-weight:600;font-family:inherit;">Về menu</button></div></div>'+
-    (wc>0?'<div class="card" style="padding:16px;"><h3 style="font-size:15px;font-weight:600;margin:0 0 10px;color:var(--wrong);">Câu cần ôn lại ('+wc+')</h3>'+wrongList+'</div>':'');
-  document.getElementById("retryBtn").onclick=function(){startQuiz(sub.key);};
-  document.getElementById("lbBtn").onclick=function(){renderLeaderboard(sub.key,false);};
-  document.getElementById("menuBtn").onclick=function(){renderMenu();};
+  if(!wc)wl='<div style="text-align:center;color:var(--accent);font-weight:700;padding:14px;font-size:14px;">🎉 Hoàn hảo! Bạn đã trả lời đúng toàn bộ '+total+' câu hỏi.</div>';
+
+  main.innerHTML='<div class="card" style="padding:24px 18px;text-align:center;margin-bottom:14px;">'+
+    '<div style="display:inline-block;background:var(--accent-soft);color:'+(sub.color||'var(--accent)')+';padding:4px 14px;border-radius:999px;font-size:12px;font-weight:700;margin-bottom:8px;">'+sub.name+'</div>'+
+    '<div style="font-size:46px;font-weight:700;color:'+color+';margin:4px 0;">'+sc+'<span style="font-size:20px;color:var(--muted);">/'+total+'</span></div>'+
+    '<div style="font-size:16px;font-weight:700;color:'+color+';margin-bottom:4px;">'+msg+' · '+pct+'%</div>'+
+    '<div style="font-size:12px;color:var(--muted);margin-bottom:16px;">✓ Đã ghi nhận điểm vào BXH cá nhân</div>'+
+    
+    /* KHUNG NHẬN XÉT CHI TIẾT ƯU - NHƯỢC ĐIỂM BÀI LÀM */
+    '<div style="text-align:left;background:rgba(255,255,255,.9);border:1.5px solid var(--border);border-radius:16px;padding:16px;margin-bottom:18px;box-shadow:0 4px 12px rgba(0,0,0,.03);">'+
+      '<h3 style="font-size:15px;font-weight:700;color:var(--text);margin:0 0 10px;display:flex;align-items:center;gap:6px;">📊 ĐÁNH GIÁ CHI TIẾT BÀI LÀM</h3>'+
+      
+      '<div style="margin-bottom:10px;">'+
+        '<div style="font-size:13px;font-weight:700;color:#16a34a;margin-bottom:4px;">🌟 Ưu điểm nổi bật:</div>'+
+        '<ul style="margin:0;padding-left:18px;font-size:12px;color:var(--text);line-height:1.5;">'+goodHtml+'</ul>'+
+      '</div>'+
+      
+      '<div style="margin-bottom:10px;">'+
+        '<div style="font-size:13px;font-weight:700;color:#c2410c;margin-bottom:4px;">⚠️ Điểm cần cải thiện:</div>'+
+        '<ul style="margin:0;padding-left:18px;font-size:12px;color:var(--text);line-height:1.5;">'+badHtml+'</ul>'+
+      '</div>'+
+      
+      '<div style="background:var(--accent-soft);padding:10px 12px;border-radius:10px;font-size:12px;color:var(--accent);font-weight:600;">'+
+        '📌 <b>Lời khuyên:</b> '+evalRes.advice+
+      '</div>'+
+    '</div>'+
+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">'+
+      '<button class="btn" id="retry" style="background:var(--accent);color:#fff;border:none;padding:10px 18px;border-radius:12px;font-size:13px;font-weight:600;font-family:inherit;">Làm lại môn này</button>'+
+      '<button class="btn" id="lb" style="background:#fff;color:var(--accent);border:2px solid var(--accent);padding:10px 18px;border-radius:12px;font-size:13px;font-weight:600;font-family:inherit;">Xem BXH</button>'+
+      '<button class="btn" id="home" style="background:#fff;color:var(--muted);border:2px solid var(--border);padding:10px 18px;border-radius:12px;font-size:13px;font-weight:600;font-family:inherit;">Môn khác</button></div>'+
+    '</div>'+
+    (wc>0?'<div class="card" style="padding:16px;"><h3 style="font-size:14px;font-weight:700;margin:0 0 12px;color:#dc2626;">📖 Các câu làm sai cần xem lại ('+wc+')</h3>'+wl+'</div>':'');
+    
+  document.getElementById('retry').onclick=function(){startQuiz(sub.key);};
+  document.getElementById('lb').onclick=function(){renderLeaderboard(sub.key);};
+  document.getElementById('home').onclick=renderHome;
 }
 
-function renderLeaderboard(key, isPublic){
-  var sub=SUBJECTS[key]; applyTheme(sub);
-  var lb=aggregateLB(key);
-  var rows="";
-  if(lb.length===0){ rows='<div style="text-align:center;color:var(--muted);padding:28px;font-size:14px;">Chưa có lượt thi nào. Hãy là người đầu tiên!</div>'; }
-  else{
-    lb.slice(0,20).forEach(function(e,idx){
-      var medal=idx===0?"🥇":idx===1?"🥈":idx===2?"🥉":(idx+1)+".";
-      var isMe=(state.name && e.name.toLowerCase()===state.name.toLowerCase())?'border:2px solid var(--accent);background:var(--accent-soft);':'';
-      rows+='<div class="lb-row" style="'+isMe+'">'+
-        '<div style="display:flex;align-items:center;gap:10px;min-width:0;"><span style="font-weight:700;width:28px;text-align:center;flex-shrink:0;font-size:15px;">'+medal+'</span>'+
-        '<div style="min-width:0;"><div style="font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px;">'+e.name+'</div>'+
-        '<div style="font-size:11px;color:var(--muted);">Thi '+e.attempts+' lần · gần nhất '+e.date+'</div></div></div>'+
-        '<div style="text-align:right;flex-shrink:0;"><div style="font-weight:700;color:var(--accent);font-size:15px;">'+e.score+'/'+e.total+'</div>'+
-        '<div style="font-size:11px;color:var(--muted);font-weight:600;">'+e.pct+'%</div></div></div>';
-    });
+/* ===== ADMIN ===== */
+function renderAdmin(){
+  applyTheme();setStatus('admin');
+  var nAcc=USERS.filter(function(u){return !u.isAdmin;}).length;
+  var nAttempts=getLB('khtn').length+getLB('lsdl').length+getLB('cn').length;
+  var nPart=aggLB('khtn').concat(aggLB('lsdl')).concat(aggLB('cn')).filter(function(v,i,a){return a.findIndex(function(x){return x.userId===v.userId;})===i;}).length;
+  var accRows='';
+  USERS.filter(function(u){return !u.isAdmin;}).forEach(function(u){
+    var bestKH=aggLB('khtn').find(function(x){return x.userId===u.id;});
+    var bestLS=aggLB('lsdl').find(function(x){return x.userId===u.id;});
+    var bestCN=aggLB('cn').find(function(x){return x.userId===u.id;});
+    var stText=u.status.at==='quiz'?'Đang làm bài '+u.status.subject+' (câu '+(u.status.qIndex||'?')+'/'+(u.status.total||'?')+') · '+ago(u.status.time):(u.status.at==='menu'?'Đang ở menu · '+ago(u.status.time):'Hoạt động '+ago(u.status.time));
+    accRows+='<div class="lb-row" style="flex-wrap:wrap;gap:6px;"><div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1;">'+
+      avHtml(u,'av-sm')+'<div style="min-width:0;"><div style="font-weight:700;font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px;">'+u.username+'</div>'+
+      '<div style="font-size:11px;color:var(--accent2);font-weight:600;">'+stText+'</div>'+
+      '<div style="font-size:10px;color:var(--muted);">KHTN: '+(bestKH?bestKH.pct+'%':'--')+' · LS: '+(bestLS?bestLS.pct+'%':'--')+' · CN: '+(bestCN?bestCN.pct+'%':'--')+'</div></div></div>'+
+      '<button class="btn" data-delacc="'+u.id+'" style="background:#dc2626;color:#fff;border:none;padding:6px 10px;border-radius:8px;font-size:11px;font-weight:600;font-family:inherit;flex-shrink:0;">Xóa</button></div>';
+  });
+  if(!accRows)accRows='<div style="text-align:center;color:var(--muted);padding:16px;font-size:13px;">Chưa có tài khoản người dùng nào.</div>';
+  var themeBtns='';
+  [{k:'default',n:'Mặc định'},{k:'elsa',n:'❄️ Elsa'},{k:'kitty',n:'🎀 Hello Kitty'},{k:'ocean',n:'🌊 Ocean'},{k:'sunset',n:'🌅 Sunset'}].forEach(function(t){
+    themeBtns+='<button class="btn" data-theme="'+t.k+'" style="flex:1;min-width:100px;background:'+(THEME.type===t.k?'var(--accent)':'#fff')+';color:'+(THEME.type===t.k?'#fff':'var(--text)')+';border:2px solid var(--accent);padding:10px;border-radius:12px;font-size:12px;font-weight:600;font-family:inherit;margin-bottom:8px;">'+t.n+'</button>';
+  });
+  main.innerHTML='<div class="card" style="padding:20px 16px;margin-bottom:12px;">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">'+
+      '<h2 style="font-size:18px;font-weight:700;margin:0;color:var(--accent2);">⚙️ Trang Quản Trị Admin</h2>'+
+      '<button class="btn" id="logoutA" style="background:#fff;color:var(--muted);border:1.5px solid var(--border);padding:7px 12px;border-radius:10px;font-size:12px;font-weight:600;font-family:inherit;">Đăng xuất</button></div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">'+
+      '<div style="background:var(--accent-soft);border-radius:12px;padding:12px;text-align:center;"><div style="font-size:22px;font-weight:700;color:var(--accent);">'+nAcc+'</div><div style="font-size:10px;color:var(--muted);font-weight:600;">TÀI KHOẢN</div></div>'+
+      '<div style="background:var(--accent2-soft);border-radius:12px;padding:12px;text-align:center;"><div style="font-size:22px;font-weight:700;color:var(--accent2);">'+nAttempts+'</div><div style="font-size:10px;color:var(--muted);font-weight:600;">LẦN THI</div></div>'+
+      '<div style="background:rgba(220,38,38,.1);border-radius:12px;padding:12px;text-align:center;"><div style="font-size:22px;font-weight:700;color:#dc2626;">'+nPart+'</div><div style="font-size:10px;color:var(--muted);font-weight:600;">NGƯỜI THI</div></div></div>'+
+    '<h3 style="font-size:14px;font-weight:700;margin:0 0 8px;color:var(--text);">👥 Danh sách Học sinh</h3>'+accRows+'</div>'+
+  '<div class="card" style="padding:18px 16px;margin-bottom:12px;">'+
+    '<h3 style="font-size:14px;font-weight:700;margin:0 0 10px;color:var(--text);">🎨 Đổi giao diện hệ thống</h3>'+
+    '<div style="display:flex;flex-wrap:wrap;gap:8px;">'+themeBtns+'</div>'+
+    '<div style="margin-top:10px;"><label style="font-size:12px;font-weight:600;color:var(--muted);">Tải ảnh nền tùy chỉnh:</label>'+
+    '<input id="bgFile" type="file" accept="image/*" style="display:block;margin-top:6px;font-size:12px;color:var(--muted);"></div></div>'+
+  '<div class="card" style="padding:18px 16px;margin-bottom:12px;">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><h3 style="font-size:14px;font-weight:700;margin:0;color:var(--text);">📅 Quản lý lịch thi</h3>'+
+    '<button class="btn" id="editSched" style="background:var(--accent);color:#fff;border:none;padding:7px 12px;border-radius:10px;font-size:12px;font-weight:600;font-family:inherit;">Sửa lịch thi</button></div>'+
+    '<div style="font-size:12px;color:var(--muted);">Hiện có '+SCHEDULE.length+' kỳ thi đã lên lịch</div></div>';
+  document.getElementById('logoutA').onclick=function(){ME=null;SESSION=null;localStorage.removeItem('quiz_session');renderAuth();};
+  document.querySelectorAll('[data-delacc]').forEach(function(el){el.onclick=function(){var id=el.getAttribute('data-delacc');if(!confirm('Xóa tài khoản này?'))return;USERS=USERS.filter(function(u){return u.id!==id;});saveUsers();['khtn','lsdl','cn'].forEach(function(k){set(lbKey(k),getLB(k).filter(function(e){return e.userId!==id;}));});renderAdmin();};});
+  document.querySelectorAll('[data-theme]').forEach(function(el){el.onclick=function(){THEME={type:el.getAttribute('data-theme')};set('quiz_theme',THEME);applyTheme();renderAdmin();};});
+  document.getElementById('bgFile').onchange=function(e){handleAvatarFile(e.target.files[0],function(d){THEME={type:'image',img:d};set('quiz_theme',THEME);applyTheme();renderAdmin();});};
+  document.getElementById('editSched').onclick=function(){renderSchedule(true);};
+}
+
+/* ===== CLOUD CHAT REAL-TIME + THANOS SNAP EFFECT ===== */
+(function(){
+  var cs=document.createElement('style');
+  cs.textContent=
+    '#userModal.open{display:flex!important;}'+
+    '#um-card{background:var(--card);border:1px solid var(--border);border-radius:22px;max-width:440px;width:100%;height:min(80vh,620px);position:relative;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4);animation:umIn .4s cubic-bezier(.2,1.3,.4,1);display:flex;flex-direction:column;}'+
+    '@keyframes umIn{from{opacity:0;transform:scale(.9) translateY(14px);}to{opacity:1;transform:scale(1) translateY(0);}}'+
+    '#um-scroll{flex:1;overflow-y:auto;padding:22px 18px 190px;position:relative;z-index:1;}'+
+    '.um-av{width:90px;height:90px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;color:#fff;background:var(--accent);border:4px solid #fff;box-shadow:0 0 0 2px var(--accent);object-fit:cover;}'+
+    '.um-leave{width:100%;padding:13px;border-radius:12px;border:1.5px solid var(--wrong);background:transparent;color:var(--wrong);font-weight:600;font-size:14px;cursor:pointer;font-family:inherit;transition:background .2s;}'+
+    '.um-leave:hover{background:rgba(220,38,38,.1);}'+
+    '.um-mirror{position:absolute;top:14px;right:14px;z-index:25;width:150px;background:rgba(15,23,42,.92);border:1px solid var(--border);border-radius:14px;padding:8px 10px;box-shadow:0 10px 30px rgba(0,0,0,.35);animation:umIn .4s ease;}'+
+    '.um-mirror .um-mt{font-size:10px;font-weight:700;color:#fbbf24;letter-spacing:.5px;margin-bottom:5px;}'+
+    '.um-mirror .um-live{font-size:11px;color:#e0f2fe;background:rgba(14,165,233,.15);border:1px solid rgba(14,165,233,.35);border-radius:8px;padding:5px 7px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-style:italic;}'+
+    '.um-mirror .um-msg{font-size:10px;color:#f3f3f8;background:rgba(255,255,255,.08);border-radius:8px;padding:4px 7px;margin-top:4px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}'+
+    '.cloud-widget{position:absolute;right:14px;bottom:14px;z-index:30;width:250px;animation:cloudIn .55s cubic-bezier(.34,1.56,.64,1) both, cloudFloat 3.5s ease-in-out .55s infinite;}'+
+    '@keyframes cloudIn{0%{opacity:0;transform:translateX(40px) scale(.6);}100%{opacity:1;transform:translateX(0) scale(1);}}'+
+    '@keyframes cloudFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}'+
+    '.cloud-body{background:#fff;border-radius:22px;padding:12px;box-shadow:0 16px 40px -8px rgba(0,0,0,.35);position:relative;}'+
+    '.cloud-body::before,.cloud-body::after{content:"";position:absolute;background:#fff;border-radius:50%;}'+
+    '.cloud-body::before{width:42px;height:42px;top:-16px;left:26px;}'+
+    '.cloud-body::after{width:28px;height:28px;top:-10px;left:58px;}'+
+    '.cloud-head{display:flex;align-items:center;gap:6px;margin-bottom:8px;position:relative;z-index:1;font-size:12px;font-weight:700;color:#6d28d9;}'+
+    '.cloud-log{max-height:130px;min-height:50px;overflow-y:auto;position:relative;z-index:1;margin-bottom:8px;padding-right:2px;}'+
+    '.c-msg{max-width:88%;padding:7px 10px;border-radius:12px;font-size:12px;margin-bottom:5px;line-height:1.4;word-break:break-word;}'+
+    '.c-msg.me{background:linear-gradient(135deg,#8b5cf6,#ec4899);color:#fff;margin-left:auto;border-bottom-right-radius:3px;}'+
+    '.c-msg.them{background:#f1f5f9;color:#0f172a;border-bottom-left-radius:3px;}'+
+    '.c-empty{font-size:11px;color:#94a3b8;text-align:center;padding:12px 4px;}'+
+    '.c-typing{display:flex;gap:3px;align-items:center;margin-bottom:6px;position:relative;z-index:1;}'+
+    '.c-typing .td{width:5px;height:5px;border-radius:50%;background:#94a3b8;animation:cblink 1.2s infinite;}'+
+    '.c-typing .td:nth-child(2){animation-delay:.2s;}.c-typing .td:nth-child(3){animation-delay:.4s;}'+
+    '@keyframes cblink{0%,60%,100%{opacity:.3;transform:translateY(0);}30%{opacity:1;transform:translateY(-2px);}}'+
+    '.c-input-row{display:flex;gap:6px;position:relative;z-index:1;}'+
+    '.c-input{flex:1;border:1px solid #e2e8f0;border-radius:999px;padding:7px 12px;font-size:12px;outline:none;font-family:inherit;background:#f8fafc;color:#0f172a;}'+
+    '.c-input:focus{border-color:#8b5cf6;}'+
+    '.c-send{background:linear-gradient(135deg,#8b5cf6,#ec4899);color:#fff;border:none;border-radius:999px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;}'+
+    '.c-send:active{transform:scale(.93);}'+
+    '.bye-pop{position:absolute;z-index:60;font-weight:700;color:#f59e0b;font-size:18px;animation:byePop .7s ease-out both;pointer-events:none;white-space:nowrap;text-shadow:0 2px 10px rgba(0,0,0,.4);}'+
+    '@keyframes byePop{0%{opacity:0;transform:translateY(10px) scale(.6);}30%{opacity:1;transform:translateY(0) scale(1.15);}100%{opacity:0;transform:translateY(-26px) scale(1);}}'+
+    '#snap-canvas{position:absolute;pointer-events:none;z-index:55;}';
+  document.head.appendChild(cs);
+})();
+
+var viewingUser=null, autoReplyTimer=null, replyIdx2=0;
+var AUTO_REPLIES2=['Chào bạn, chúc bạn ôn thi tốt nhé!','Mình vừa hoàn thành đề Hóa 8 được 90% đó!','Bạn thấy phần tính mol có khó không?','Thi giữa kì cố gắng điểm 10 nha!','Đám mây chat này xịn xịn ghê ~'];
+function chatKey2(a,b){return [a,b].sort().join('|');}
+function getChats(){return get('quiz_chats',{});}
+function saveChats(c){set('quiz_chats',c);}
+
+window.viewUser=function(uid){
+  if(!ME)return;
+  if(uid===ME.id)return;
+  var u=USERS.find(function(x){return x.id===uid;});
+  if(!u)return;
+  viewingUser=u;
+  var bestKH=aggLB('khtn').find(function(x){return x.userId===u.id;});
+  var bestLS=aggLB('lsdl').find(function(x){return x.userId===u.id;});
+  var bestCN=aggLB('cn').find(function(x){return x.userId===u.id;});
+  var av=u.avatar?'<img class="um-av" src="'+u.avatar+'">':'<div class="um-av">'+u.username.charAt(0).toUpperCase()+'</div>';
+  var modal=document.getElementById('userModal');
+  modal.innerHTML=
+    '<div id="um-card">'+
+      '<div id="um-scroll">'+
+        '<div style="text-align:center;margin-bottom:14px;">'+av+
+        '<div style="font-size:19px;font-weight:700;color:var(--text);">'+u.username+'</div>'+
+        '<div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Thành viên · Tham gia '+new Date(u.createdAt).toLocaleDateString('vi-VN')+'</div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:14px;">'+
+          '<div style="background:var(--accent-soft);border-radius:12px;padding:10px;text-align:center;"><div style="font-size:16px;font-weight:700;color:#16a34a;">'+(bestKH?bestKH.pct+'%':'--')+'</div><div style="font-size:9px;color:var(--muted);font-weight:600;">KHTN Hóa</div></div>'+
+          '<div style="background:var(--accent-soft);border-radius:12px;padding:10px;text-align:center;"><div style="font-size:16px;font-weight:700;color:#b45309;">'+(bestLS?bestLS.pct+'%':'--')+'</div><div style="font-size:9px;color:var(--muted);font-weight:600;">LS-Địa</div></div>'+
+          '<div style="background:var(--accent2-soft);border-radius:12px;padding:10px;text-align:center;"><div style="font-size:16px;font-weight:700;color:#0d7a8a;">'+(bestCN?bestCN.pct+'%':'--')+'</div><div style="font-size:9px;color:var(--muted);font-weight:600;">Công Nghệ</div></div>'+
+        '</div>'+
+        '<div style="font-size:12px;color:var(--muted);line-height:1.6;background:var(--accent-soft);border-radius:12px;padding:12px;text-align:left;">Đám mây chat real-time góc phải cho phép bạn trao đổi trực tiếp với học sinh này.</div>'+
+        '</div>'+
+        '<button class="um-leave" id="um-leave">RỜI KHỎI TRANG (đám mây sẽ tan biến)</button>'+
+      '</div>'+
+      '<div class="um-mirror" id="um-mirror"><div class="um-mt">MÀN HÌNH CỦA '+u.username.toUpperCase()+'</div><div class="um-live" id="um-live" style="display:none;"></div><div id="um-msgs"></div></div>'+
+      '<div class="cloud-widget" id="cloud-widget">'+
+        '<div class="cloud-body">'+
+          '<div class="cloud-head">☁ Trò chuyện với '+u.username+'</div>'+
+          '<div class="cloud-log" id="cloud-log"></div>'+
+          '<div class="c-typing" id="cloud-typing" style="display:none;"><span class="td"></span><span class="td"></span><span class="td"></span><span style="font-size:11px;color:#94a3b8;margin-left:4px;" id="cloud-typing-label">đang gõ...</span></div>'+
+          '<div class="c-input-row"><input class="c-input" id="cloud-input" placeholder="Nhắn tin..." autocomplete="off"><button class="c-send" id="cloud-send" type="button">Gửi</button></div>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  modal.classList.add('open');
+  renderCloudLog2();
+  document.getElementById('um-leave').onclick=closeUserProfile2;
+  modal.onclick=function(e){if(e.target===modal)closeUserProfile2();};
+  setTimeout(function(){var i=document.getElementById('cloud-input');if(i)i.focus();},400);
+};
+
+window.renderCloudLog2=function(){
+  if(!viewingUser)return;
+  var key=chatKey2(ME.id,viewingUser.id), chats=getChats();
+  var msgs=chats[key]||[];
+  var log=document.getElementById('cloud-log');
+  if(!log)return;
+  if(!msgs.length)log.innerHTML='<div class="c-empty">Gửi lời chào để bắt đầu nhắn tin!</div>';
+  else log.innerHTML=msgs.map(function(m){return '<div class="c-msg '+(m.from===ME.id?'me':'them')+'">'+m.text.replace(/</g,'&lt;')+'</div>';}).join('');
+  log.scrollTop=log.scrollHeight;
+  var mine=msgs.filter(function(m){return m.from===ME.id;}).slice(-3);
+  var mm=document.getElementById('um-msgs');if(mm)mm.innerHTML=mine.map(function(m){return '<div class="um-msg">'+ME.username+': '+m.text.replace(/</g,'&lt;')+'</div>';}).join('');
+};
+
+window.sendCloudMsg2=function(){
+  var inp=document.getElementById('cloud-input');
+  if(!inp||!viewingUser)return;
+  var txt=inp.value.trim();
+  if(!txt)return;
+  var key=chatKey2(ME.id,viewingUser.id), chats=getChats();
+  if(!chats[key])chats[key]=[];
+  chats[key].push({from:ME.id,text:txt});
+  saveChats(chats);
+  inp.value='';
+  var live=document.getElementById('um-live');if(live)live.style.display='none';
+  renderCloudLog2();
+  if(autoReplyTimer)clearTimeout(autoReplyTimer);
+  var fid=viewingUser.id;
+  autoReplyTimer=setTimeout(function(){
+    var ty=document.getElementById('cloud-typing');
+    if(ty){ty.style.display='flex';var lb=document.getElementById('cloud-typing-label');if(lb)lb.textContent=viewingUser.username+' đang gõ...';}
+    autoReplyTimer=setTimeout(function(){
+      var rep=AUTO_REPLIES2[replyIdx2%AUTO_REPLIES2.length];replyIdx2++;
+      var c2=getChats();var k2=chatKey2(ME.id,fid);if(!c2[k2])c2[k2]=[];
+      c2[k2].push({from:fid,text:rep});saveChats(c2);
+      var ty2=document.getElementById('cloud-typing');if(ty2)ty2.style.display='none';
+      renderCloudLog2();
+    },1500);
+  },800);
+};
+
+document.addEventListener('input',function(e){
+  if(e.target&&e.target.id==='cloud-input'&&viewingUser){
+    var v=e.target.value.trim();
+    var live=document.getElementById('um-live');
+    if(!live)return;
+    if(v){live.style.display='block';live.textContent=ME.username+' đang gõ: "'+v+'"';}
+    else live.style.display='none';
   }
-  var backBtn = isPublic
-    ? '<button class="btn" id="backHome" style="flex:1;background:var(--accent);color:#fff;border:none;padding:12px;border-radius:14px;font-size:14px;font-weight:600;font-family:inherit;">← Về trang chào</button>'
-    : '<button class="btn" id="backMenu" style="flex:1;background:#fff;color:var(--muted);border:2px solid var(--border);padding:12px;border-radius:14px;font-size:14px;font-weight:600;font-family:inherit;">Về menu</button>';
-  main.innerHTML='<div class="card" style="padding:22px 18px;">'+
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px;">'+
-      '<h2 style="font-size:18px;font-weight:700;margin:0;color:var(--accent);">🏆 BXH công khai</h2>'+
-      '<span style="font-size:12px;background:var(--accent-soft);color:var(--accent);padding:4px 12px;border-radius:999px;font-weight:600;">'+sub.short+'</span></div>'+
-    '<p style="font-size:12px;color:var(--muted);margin:0 0 4px;">'+sub.name+' · Top 20 (gộp theo từng người, lấy điểm cao nhất)</p>'+
-    '<p style="font-size:11px;color:var(--accent2);font-weight:600;margin:0 0 14px;">💡 Gợi ý: bấm vào chuối vàng để xem nó nhảy!</p>'+
-    rows+
-    '<div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;">'+
-      '<button class="btn" id="doQuiz" style="flex:1;background:var(--accent);color:#fff;border:none;padding:12px;border-radius:14px;font-size:14px;font-weight:600;font-family:inherit;">Làm bài này</button>'+
-      backBtn+'</div></div>';
-  document.getElementById("doQuiz").onclick=function(){ if(!state.name){ renderWelcome(); return; } startQuiz(key); };
-  var bh=document.getElementById("backHome"); if(bh) bh.onclick=function(){renderWelcome();};
-  var bm=document.getElementById("backMenu"); if(bm) bm.onclick=function(){renderMenu();};
+});
+document.addEventListener('keydown',function(e){
+  if(e.target&&e.target.id==='cloud-input'&&e.key==='Enter')sendCloudMsg2();
+});
+document.addEventListener('click',function(e){
+  if(e.target&&e.target.id==='cloud-send')sendCloudMsg2();
+});
+
+function thanosSnap2(el,container,done){
+  var rect=el.getBoundingClientRect(), crect=container.getBoundingClientRect();
+  var w=rect.width,h=rect.height;
+  var canvas=document.createElement('canvas');
+  canvas.id='snap-canvas';canvas.width=w*2;canvas.height=h*2;
+  canvas.style.left=(rect.left-crect.left)+'px';canvas.style.top=(rect.top-crect.top)+'px';
+  canvas.style.width=w+'px';canvas.style.height=h+'px';
+  container.appendChild(canvas);
+  var ctx=canvas.getContext('2d');ctx.scale(2,2);
+  var colors=['#ffffff','#ede9fe','#c4b5fd','#fbcfe8','#f5d0fe'];
+  var ps=[];var cols=12,rows=9,cw=w/cols,ch=h/rows;
+  for(var i=0;i<cols;i++)for(var j=0;j<rows;j++){
+    if(Math.random()<0.3)continue;
+    ps.push({x:i*cw+Math.random()*cw,y:j*ch+Math.random()*ch,vx:(Math.random()-0.5)*1.6,vy:-(Math.random()*2.2+0.6),size:Math.random()*3.5+1.5,color:colors[(Math.random()*colors.length)|0],life:1,decay:0.006+Math.random()*0.012,rot:Math.random()*Math.PI,vr:(Math.random()-0.5)*0.12});
+  }
+  el.style.transition='opacity .3s ease';el.style.opacity='0';el.style.pointerEvents='none';
+  var t=0;
+  function frame(){
+    ctx.clearRect(0,0,w,h);var alive=false;
+    for(var i=0;i<ps.length;i++){var p=ps[i];if(p.life<=0)continue;alive=true;
+      p.x+=p.vx;p.y+=p.vy;p.vy+=0.015;p.vx*=0.99;p.rot+=p.vr;p.life-=p.decay;
+      ctx.save();ctx.globalAlpha=Math.max(0,p.life);ctx.translate(p.x,p.y);ctx.rotate(p.rot);ctx.fillStyle=p.color;ctx.fillRect(-p.size/2,-p.size/2,p.size,p.size);ctx.restore();}
+    t++;
+    if(alive&&t<220)requestAnimationFrame(frame);
+    else{canvas.remove();el.remove();done&&done();}
+  }
+  frame();
 }
 
-renderWelcome();
+window.closeUserProfile2=function(){
+  var cloud=document.getElementById('cloud-widget');
+  var card=document.getElementById('um-card');
+  var modal=document.getElementById('userModal');
+  if(autoReplyTimer){clearTimeout(autoReplyTimer);autoReplyTimer=null;}
+  if(cloud&&card){
+    var bye=document.createElement('div');bye.className='bye-pop';bye.textContent='Hello~ Bye~ 👋';
+    var r=cloud.getBoundingClientRect(),cr=card.getBoundingClientRect();
+    bye.style.left=(r.left-cr.left+70)+'px';bye.style.top=(r.top-cr.top-6)+'px';
+    card.appendChild(bye);
+    var mir=document.getElementById('um-mirror');if(mir){mir.style.transition='opacity .4s';mir.style.opacity='0';}
+    setTimeout(function(){
+      thanosSnap2(cloud,card,function(){
+        modal.classList.remove('open');modal.innerHTML='';viewingUser=null;
+      });
+    },500);
+  }else{
+    modal.classList.remove('open');modal.innerHTML='';viewingUser=null;
+  }
+};
+
+/* ===== START INITIALIZATION ===== */
+applyTheme();
+if(ME){ME.isAdmin?renderAdmin():renderHome();}else{renderAuth();}
 })();
 </script>
+</body>
 </html>
+```
